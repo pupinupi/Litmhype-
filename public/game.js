@@ -1,51 +1,66 @@
-const socket = io()
-const name = localStorage.getItem("name")
-const room = localStorage.getItem("room")
-const color = localStorage.getItem("color")
+// Элемент игрового поля
+const board = document.getElementById("board")
 
+// Элемент фишки (для визуализации)
 const playerEl = document.getElementById("player")
+
+// Цвет игрока
+const color = localStorage.getItem("color") || "yellow"
 playerEl.classList.add(color)
 
-let position = 0
+// Массив координат клеток
+let cells = []
 
-const cells = [
-{x:110,y:850},{x:110,y:720},{x:110,y:580},{x:110,y:440},{x:110,y:300},
-{x:250,y:200},{x:400,y:200},{x:540,y:200},{x:680,y:200},{x:820,y:200},{x:900,y:300},
-{x:900,y:450},{x:900,y:600},{x:900,y:750},{x:820,y:850},
-{x:680,y:850},{x:540,y:850},{x:400,y:850},{x:250,y:850},
-{x:110,y:850}
-]
-
-function moveToCell(i){
-    playerEl.style.left = cells[i].x + "px"
-    playerEl.style.top = cells[i].y + "px"
+// Функция поставить точку на поле
+function placeCell(x, y) {
+    const dot = document.createElement("div")
+    dot.style.width = "12px"
+    dot.style.height = "12px"
+    dot.style.background = "red"
+    dot.style.borderRadius = "50%"
+    dot.style.position = "absolute"
+    dot.style.left = (x - 6) + "px"
+    dot.style.top = (y - 6) + "px"
+    board.appendChild(dot)
+    cells.push({x, y})
+    console.log(`Клетка ${cells.length}: {x:${x}, y:${y}}`)
 }
 
-moveToCell(position)
-
-function movePlayer(steps){
-    let i = 0
-    function step(){
-        if(i<steps){
-            position++
-            if(position>=cells.length) position=0
-            moveToCell(position)
-            socket.emit("move",{room,playerId:socket.id,position})
-            i++
-            setTimeout(step,400)
-        }
-    }
-    step()
-}
-
-document.getElementById("dice").onclick=()=>{
-    const dice = Math.floor(Math.random()*6)+1
-    alert("Выпало: "+dice)
-    movePlayer(dice)
-}
-
-socket.emit("joinRoom",{name,room,color})
-
-socket.on("updatePlayers",players=>{
-    // здесь можно добавить отображение других игроков
+// Клик по полю добавляет клетку
+board.addEventListener("click", e => {
+    const rect = board.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    placeCell(x, y)
 })
+
+// Кнопка сброса всех точек
+const resetBtn = document.createElement("button")
+resetBtn.textContent = "Сбросить точки"
+resetBtn.style.marginTop = "10px"
+resetBtn.onclick = () => {
+    cells = []
+    const dots = board.querySelectorAll("div")
+    dots.forEach(dot => dot.remove())
+}
+board.parentNode.appendChild(resetBtn)
+
+// Кнопка копирования координат в консоль
+const copyBtn = document.createElement("button")
+copyBtn.textContent = "Скопировать координаты"
+copyBtn.style.marginTop = "10px"
+copyBtn.style.marginLeft = "10px"
+copyBtn.onclick = () => {
+    console.log("Массив координат для game.js:")
+    console.log(JSON.stringify(cells, null, 4))
+}
+board.parentNode.appendChild(copyBtn)
+
+// Опционально: показать фишку на старте
+function moveToCell(i){
+    if(cells[i]){
+        playerEl.style.left = cells[i].x + "px"
+        playerEl.style.top = cells[i].y + "px"
+    }
+}
+moveToCell(0)
