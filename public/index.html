@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Litvin: Путь к хайпу</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Литвин: Путь к хайпу</h1>
+
+<input id="name" placeholder="Имя игрока">
+
+<input id="room" placeholder="Код комнаты">
+
+<select id="color">
+<option value="yellow">Жёлтая</option>
+<option value="red">Красная</option>
+<option value="blue">Синяя</option>
+<option value="purple">Фиолетовая</option>
+</select>
+
+<button onclick="join()">Войти</button>
+
+<script>
+
+function join(){
+
+const name=document.getElementById("name").value;
+const room=document.getElementById("room").value;
+const color=document.getElementById("color").value;
+
+localStorage.setItem("name",name);
+localStorage.setItem("room",room);
+localStorage.setItem("color",color);
+
+window.location="room.html";
+
+}
+
+</script>
+
+</body>
+</html>
