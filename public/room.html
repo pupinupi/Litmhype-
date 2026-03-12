@@ -1,82 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
-
 <title>Игра</title>
-
-<style>
-
-body{
-background:#000;
-text-align:center;
-color:white;
-font-family:Arial;
-}
-
-#board{
-
-position:relative;
-width:1024px;
-height:1024px;
-
-margin:auto;
-
-background:url("board.jpg");
-background-size:cover;
-
-}
-
-.player{
-
-width:30px;
-height:30px;
-
-border-radius:50%;
-
-position:absolute;
-
-transition:0.35s;
-
-}
-
-.yellow{background:yellow}
-.red{background:red}
-.blue{background:blue}
-.purple{background:purple}
-
-#dice{
-
-margin-top:20px;
-
-padding:12px 30px;
-
-font-size:22px;
-
-cursor:pointer;
-
-}
-
-</style>
-
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
 <h2>Комната</h2>
 
 <div id="board">
-
-<div id="player" class="player"></div>
-
+  <div id="player" class="player"></div>
 </div>
-
-<br>
 
 <button id="dice">Бросить кубик</button>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="game.js"></script>
-
 </body>
 </html>
