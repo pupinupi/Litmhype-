@@ -1,20 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
-<title>Игра</title>
-<link rel="stylesheet" href="style.css">
+<title>Разметка клеток</title>
+
+<style>
+
+body{
+background:#111;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+#board{
+position:relative;
+width:1024px;
+height:1024px;
+margin:auto;
+background:url("board.jpg");
+background-size:cover;
+border:3px solid white;
+}
+
+.dot{
+width:14px;
+height:14px;
+background:red;
+border-radius:50%;
+position:absolute;
+transform:translate(-50%,-50%);
+}
+
+button{
+margin-top:15px;
+padding:10px 20px;
+font-size:18px;
+cursor:pointer;
+}
+
+#coords{
+width:90%;
+height:200px;
+margin-top:15px;
+}
+
+</style>
+
 </head>
+
 <body>
-<h2>Комната</h2>
 
-<div id="board">
-  <div id="player" class="player"></div>
-</div>
+<h2>Разметка координат клеток</h2>
 
-<button id="dice">Бросить кубик</button>
+<p>Кликай по центру каждой клетки по порядку</p>
 
-<script src="/socket.io/socket.io.js"></script>
+<div id="board"></div>
+
+<br>
+
+<button onclick="copyCoords()">Скопировать координаты</button>
+<button onclick="resetCoords()">Сбросить</button>
+
+<br>
+
+<textarea id="coords"></textarea>
+
 <script src="game.js"></script>
+
 </body>
 </html>
