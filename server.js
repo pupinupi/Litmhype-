@@ -34,6 +34,17 @@ wss.on('connection', ws => {
                 });
                 break;
 
+                case "startGame":
+    if(rooms[data.room].players.length>=2){
+        rooms[data.room].gameStarted=true;
+        rooms[data.room].players.forEach(p=>{
+            p.send(JSON.stringify({type:"gameStarted"}));
+        });
+    } else {
+        ws.send(JSON.stringify({type:"error","message":"Нужно минимум 2 игрока"}));
+    }
+    break;
+
             case "move":
                 ws.hype=data.hype;
                 rooms[data.room].players.forEach(p=>{
