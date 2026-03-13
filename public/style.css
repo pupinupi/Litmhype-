@@ -1,35 +1,112 @@
 body{
-background:#111;
-color:white;
-font-family:Arial;
-text-align:center;
+    margin:0;
+    padding:0;
+    font-family: Arial, sans-serif;
+    background:#111;
+    color:white;
+    text-align:center;
 }
 
-#board{
-position:relative;
-width:1024px;
-height:1024px;
-margin:auto;
-background:url("board.jpg");
-background-size:cover;
+/* Лобби */
+#lobbyContainer{
+    margin-top:50px;
 }
-
-.player{
-width:30px;
-height:30px;
-border-radius:50%;
-position:absolute;
-transition:0.35s;
+input, select{
+    font-size:22px;
+    padding:12px;
+    margin:12px;
+    width:300px;
+    border-radius:10px;
+    border:2px solid #fff;
+    background: rgba(255,255,255,0.1);
+    color:white;
 }
-
-.yellow{background:yellow;}
-.red{background:red;}
-.blue{background:blue;}
-.purple{background:purple;}
-
+input::placeholder{
+    color: #ddd;
+}
 button{
-padding:12px 30px;
-font-size:22px;
-cursor:pointer;
-margin-top:15px;
+    font-size:24px;
+    padding:12px 40px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background: linear-gradient(45deg,#ffcc00,#ff6600);
+    cursor:pointer;
+    color:white;
+    font-weight:bold;
+    box-shadow: 0 0 10px #000;
+}
+button:hover{
+    box-shadow: 0 0 20px #fff;
+}
+
+/* Игровое поле */
+#board{
+    position:relative;
+    width:1024px;
+    height:1024px;
+    margin:auto;
+    background-size:cover;
+    border:3px solid white;
+}
+.player{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    position:absolute;
+    transform:translate(-50%,-50%);
+    background:yellow;
+    transition:0.35s;
+}
+#dice{
+    margin-top:20px;
+    padding:15px 30px;
+    font-size:22px;
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(45deg,#ffcc00,#ff6600);
+    color:white;
+    font-weight:bold;
+    box-shadow:0 0 10px #000;
+}
+
+/* Хайп-бар */
+#hypeContainer{
+    width:500px;
+    height:30px;
+    background:#333;
+    border-radius:15px;
+    margin:20px auto;
+    position:relative;
+}
+#hypeBar{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#ff0,#ff6600);
+    border-radius:15px;
+}
+#hypeText{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-weight:bold;
+}
+
+/* Popup карточки скандала */
+.scandalPopup{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:linear-gradient(45deg,#ff0000,#ff5555);
+    color:white;
+    font-size:22px;
+    padding:20px 40px;
+    border-radius:15px;
+    box-shadow:0 0 20px #000;
+    z-index:9999;
+    text-align:center;
 }
