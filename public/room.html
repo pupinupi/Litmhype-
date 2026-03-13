@@ -3,53 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Litvin Hype</title>
-<style>
-body{
-  background:#111;
-  color:white;
-  font-family:Arial;
-  text-align:center;
-}
-#board{
-  position:relative;
-  width:1024px;
-  height:1024px;
-  margin:auto;
-  background:url("board.jpg");
-  background-size:cover;
-  border:3px solid white;
-}
-.player{
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  position:absolute;
-  background:yellow;
-  transform:translate(-50%,-50%);
-  transition:0.35s;
-}
-#dice{
-  margin-top:20px;
-  padding:15px 30px;
-  font-size:22px;
-  cursor:pointer;
-}
-#hype{
-  margin-top:15px;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Литвин — Путь к хайпу</h2>
+<h1>Литвин — Путь к хайпу</h1>
 
-<div id="board">
-  <div id="player" class="player"></div>
+<div id="board" style="background:url('board.jpg');">
+    <div id="player" class="player"></div>
 </div>
 
-<br>
 <button id="dice">🎲 Бросить кубик</button>
-<h3 id="hype">Хайп: 0</h3>
+
+<div id="hypeContainer">
+    <div id="hypeBar"></div>
+    <span id="hypeText">0 / 100</span>
+</div>
 
 <script src="game.js"></script>
 </body>
