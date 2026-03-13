@@ -2,24 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Litvin Hype</title>
+<title>LitmHype</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body onload="showGameRules()">
-
-<h1>Литвин — Путь к хайпу</h1>
-
-<div id="board" style="background:url('board.jpg');">
-    <div id="player" class="player"></div>
+<body>
+<div id="boardContainer">
+    <img id="board" src="board.jpg" width="1024" height="1024">
+    <div id="playerList"></div>
 </div>
-
-<button id="dice">🎲 Бросить кубик</button>
-
-<div id="hypeContainer">
+<button id="dice">Бросить кубик</button>
+<div id="hypeBarContainer">
     <div id="hypeBar"></div>
     <span id="hypeText">0 / 70</span>
 </div>
-
 <script src="game.js"></script>
 </body>
 </html>
