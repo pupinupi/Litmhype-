@@ -25,13 +25,24 @@ const data=JSON.parse(msg)
 if(data.type==="join"){
 
 if(!rooms[data.room]){
-rooms[data.room]={players:[],turn:0,started:false}
+rooms[data.room]={players:[],started:false,turn:0}
 }
 
 const room=rooms[data.room]
 
+// максимум 4 игрока
 if(room.players.length>=4){
 ws.send(JSON.stringify({type:"full"}))
+return
+}
+
+// ПРОВЕРКА ЦВЕТА
+const colorUsed = room.players.find(p=>p.color===data.color)
+
+if(colorUsed){
+ws.send(JSON.stringify({
+type:"colorTaken"
+}))
 return
 }
 
@@ -48,6 +59,7 @@ ws.name=data.name
 
 room.players.push(player)
 
+// отправляем список игроков
 broadcast(data.room,{
 type:"players",
 players:room.players.map(p=>({
@@ -56,6 +68,7 @@ color:p.color,
 hype:p.hype
 }))
 })
+
 }
 
 if(data.type==="start"){
@@ -63,7 +76,10 @@ if(data.type==="start"){
 const room=rooms[data.room]
 
 if(room.players.length<2){
-ws.send(JSON.stringify({type:"error"}))
+ws.send(JSON.stringify({
+type:"error",
+msg:"Минимум 2 игрока"
+}))
 return
 }
 
@@ -88,8 +104,8 @@ broadcast(ws.room,{
 type:"move",
 name:player.name,
 pos:player.pos,
-hype:player.hype,
-color:player.color
+color:player.color,
+hype:player.hype
 })
 
 room.turn++
@@ -102,27 +118,10 @@ broadcast(ws.room,{
 type:"turn",
 player:room.players[room.turn].name
 })
+
 }
 
 })
 
-ws.on("close",()=>{
-
-const room=rooms[ws.room]
-
-if(!room) return
-
-room.players=room.players.filter(p=>p.name!==ws.name)
-
-broadcast(ws.room,{
-type:"players",
-players:room.players.map(p=>({
-name:p.name,
-color:p.color,
-hype:p.hype
-}))
 })
-})
-})
-
 server.listen(process.env.PORT||3000)
