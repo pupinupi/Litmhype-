@@ -5,19 +5,19 @@
 <title>Litvin Hype</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body onload="showGameRules()">
 
 <h1>Литвин — Путь к хайпу</h1>
 
 <div id="board" style="background:url('board.jpg');">
-    <div id="player" class="player"></div>
+    <div id="player" class="player" style="background:yellow;"></div>
 </div>
 
 <button id="dice">🎲 Бросить кубик</button>
 
 <div id="hypeContainer">
     <div id="hypeBar"></div>
-    <span id="hypeText">0 / 100</span>
+    <span id="hypeText">0 / 70</span>
 </div>
 
 <script src="game.js"></script>
