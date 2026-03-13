@@ -1,18 +1,5 @@
 ```javascript
-// подключение сокета
-const socket = io()
-
-// данные игрока
-const name = localStorage.getItem("name")
-const room = localStorage.getItem("room")
-const color = localStorage.getItem("color")
-
-// элемент фишки
-const player = document.getElementById("player")
-
-player.classList.add(color || "yellow")
-
-// координаты клеток
+// координаты клеток твоего поля
 const cells = [
 {x:103,y:600},
 {x:107,y:473},
@@ -36,7 +23,7 @@ const cells = [
 {x:213,y:615}
 ]
 
-// действия клеток
+// типы клеток
 const cellActions = [
 "start",
 "+3",
@@ -60,24 +47,17 @@ const cellActions = [
 "+4"
 ]
 
-// позиция игрока
+const player = document.getElementById("player")
+const hypeText = document.getElementById("hype")
+
 let position = 0
-
-// хайп игрока
 let hype = 0
-
-// пропуск хода
 let skipTurn = false
 
-// создать счетчик хайпа
-const hypeText = document.createElement("h3")
-hypeText.innerText = "Хайп: 0"
-document.body.appendChild(hypeText)
-
 // поставить фишку
-function moveToCell(index){
+function moveToCell(i){
 
-const cell = cells[index]
+const cell = cells[i]
 
 player.style.left = cell.x + "px"
 player.style.top = cell.y + "px"
@@ -87,7 +67,7 @@ player.style.top = cell.y + "px"
 // старт
 moveToCell(position)
 
-// применить действие клетки
+// действие клетки
 function applyCell(){
 
 const action = cellActions[position]
@@ -95,13 +75,11 @@ const action = cellActions[position]
 if(action === "start") return
 
 if(action.includes("+")){
-const value = parseInt(action)
-hype += value
+hype += parseInt(action)
 }
 
 if(action.includes("-") && !action.includes("skip")){
-const value = parseInt(action)
-hype += value
+hype += parseInt(action)
 }
 
 if(action === "skip"){
@@ -111,7 +89,6 @@ skipTurn = true
 
 if(action === "-8skip"){
 hype -= 8
-alert("−8 хайпа и пропусти ход")
 skipTurn = true
 }
 
@@ -132,41 +109,31 @@ hype +=5
 if(action === "scandal"){
 
 const scandals = [
-"Перегрел аудиторию −1 хайп",
-"Громкий заголовок −2 хайп",
-"Это монтаж −3 хайп",
-"Меня взломали −3 хайп",
-"Подписчики в шоке −4 хайп",
-"Удаляй пока не поздно −5 хайп",
-"Это контент −5 хайп и пропуск хода"
+{t:"Перегрел аудиторию 🔥",v:-1},
+{t:"Громкий заголовок 🫣",v:-2},
+{t:"Это монтаж 😱",v:-3},
+{t:"Меня взломали #️⃣",v:-3},
+{t:"Подписчики в шоке 😮",v:-4},
+{t:"Удаляй пока не поздно 🤫",v:-5},
+{t:"Это контент 🙄 (пропусти ход)",v:-5,skip:true}
 ]
 
-const random = Math.floor(Math.random()*scandals.length)
+const s = scandals[Math.floor(Math.random()*scandals.length)]
 
-alert(scandals[random])
+alert(s.t)
 
-if(random === 0) hype -=1
-if(random === 1) hype -=2
-if(random === 2) hype -=3
-if(random === 3) hype -=3
-if(random === 4) hype -=4
-if(random === 5) hype -=5
-if(random === 6){
-hype -=5
-skipTurn = true
-}
+hype += s.v
+
+if(s.skip) skipTurn = true
 
 }
 
-// хайп не может быть меньше 0
 if(hype < 0) hype = 0
 
-// обновить счетчик
 hypeText.innerText = "Хайп: " + hype
 
-// проверка победы
 if(hype >= 100){
-alert(name + " победил!")
+alert("ПОБЕДА! Ты набрал 100 хайпа!")
 }
 
 }
@@ -205,9 +172,7 @@ step()
 }
 
 // кнопка кубика
-const diceButton = document.getElementById("dice")
-
-diceButton.onclick = () => {
+document.getElementById("dice").onclick = () => {
 
 if(skipTurn){
 alert("Ты пропускаешь ход")
@@ -222,16 +187,4 @@ alert("Выпало: " + dice)
 movePlayer(dice)
 
 }
-
-// подключение к комнате
-socket.emit("joinRoom",{
-name:name,
-room:room,
-color:color
-})
-
-// обновление игроков
-socket.on("updatePlayers",(players)=>{
-console.log(players)
-})
 ```
