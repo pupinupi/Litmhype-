@@ -2,6 +2,7 @@ const player=document.getElementById("player");
 const hypeBar=document.getElementById("hypeBar");
 const hypeTextLabel=document.getElementById("hypeText");
 
+// Координаты клеток
 const cells=[
 {x:103,y:600},{x:107,y:473},{x:100,y:353},{x:103,y:235},{x:91,y:134},
 {x:213,y:98},{x:353,y:102},{x:505,y:105},{x:659,y:102},{x:802,y:103},
@@ -9,6 +10,7 @@ const cells=[
 {x:802,y:611},{x:651,y:608},{x:501,y:603},{x:361,y:611},{x:213,y:615}
 ];
 
+// Действия клеток
 const cellActions=[
 "start","+3","+2","scandal","risk","+2","scandal","+3","+5",
 "-15","-8skip","+3","risk","+3","skip","+2","scandal","+8","-10","+4"
@@ -16,7 +18,39 @@ const cellActions=[
 
 let position=0, hype=0, skipTurn=false, rounds=0, gameEnded=false;
 
-player.style.background=localStorage.getItem("color")||"yellow";
+// Настройки игрока
+const playerName = localStorage.getItem("name");
+const playerColor = localStorage.getItem("color") || "yellow";
+
+player.style.background=playerColor;
+
+// WebSocket
+const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
+
+socket.addEventListener('open', ()=> {
+    socket.send(JSON.stringify({type:"join", name:playerName, room:localStorage.getItem("room"), color:playerColor}));
+});
+
+socket.addEventListener('message', event => {
+    const data = JSON.parse(event.data);
+    if(data.type==="move" && data.player!==playerName){
+        let el = document.querySelector(`.player[data-name='${data.player}']`);
+        if(!el){
+            el = document.createElement("div");
+            el.className="player";
+            el.style.background = data.color;
+            el.setAttribute("data-name", data.player);
+            document.getElementById("board").appendChild(el);
+        }
+        el.style.left = data.position.x+"px";
+        el.style.top = data.position.y+"px";
+    }
+    if(data.type==="dice" && data.player!==playerName){
+        showScandalPopup(`Игрок ${data.player} бросил кубик: ${data.value}`,0);
+    }
+});
+
+// ---------------- Функции игры -----------------
 
 function showGameRules(){
     const rules=`<b>Правила "Литвин: Путь к хайпу"</b><br><br>
@@ -34,6 +68,9 @@ function showGameRules(){
     setTimeout(()=>popup.remove(),6000);
 }
 
+showGameRules();
+
+// Плавающий +Хайп/-Хайп
 function showFloatingHype(amount){
     if(amount===0) return;
     const floatDiv=document.createElement("div");
@@ -65,10 +102,11 @@ function moveToCell(i){
     const cell=cells[i];
     player.style.left=cell.x+"px";
     player.style.top=cell.y+"px";
-    // Подсветка убрана
 }
+
 moveToCell(position);
 
+// Всплывающее окно
 function showScandalPopup(text,amount){
     const popup=document.createElement("div");
     popup.className="scandalPopup";
@@ -80,30 +118,22 @@ function showScandalPopup(text,amount){
     setTimeout(()=>popup.remove(),2500);
 }
 
+// Применение действия клетки
 function applyCell(){
     if(gameEnded) return;
     const action=cellActions[position];
     let amount=0;
 
     if(action==="start"){
-        amount=15;
-        hype+=15;
-        showFloatingHype(amount);
+        amount=15; hype+=15; showFloatingHype(amount);
     } else if(action.includes("+") && !action.includes("skip")){ 
-        amount=parseInt(action); 
-        hype+=amount; 
+        amount=parseInt(action); hype+=amount; 
     } else if(action.includes("-") && !action.includes("skip")){ 
-        amount=parseInt(action); 
-        hype+=amount; 
+        amount=parseInt(action); hype+=amount; 
     } else if(action==="skip") skipTurn=true;
-    else if(action==="-8skip"){ 
-        amount=-8; 
-        hype-=8; 
-        skipTurn=true;
-    } else if(action==="risk"){ 
-        riskAction(); 
-        return; 
-    } else if(action==="scandal"){
+    else if(action==="-8skip"){ amount=-8; hype-=8; skipTurn=true; }
+    else if(action==="risk"){ riskAction(); return; }
+    else if(action==="scandal"){
         const scandals=[
             {t:"Перегрел аудиторию 🔥",v:-1},
             {t:"Громкий заголовок 🫣",v:-2},
@@ -114,16 +144,16 @@ function applyCell(){
             {t:"Это контент 🙄 (пропусти ход)",v:-5,skip:true}
         ];
         const s=scandals[Math.floor(Math.random()*scandals.length)];
-        amount=s.v;
-        hype+=s.v;
+        amount=s.v; hype+=s.v;
         if(s.skip) skipTurn=true;
         showScandalPopup(s.t,amount);
     } else showFloatingHype(amount);
 
     updateHype();
+    socket.send(JSON.stringify({type:"move", player:playerName, position:{x:cells[position].x,y:cells[position].y}, hype:hype}));
 }
-    
 
+// Действие Риск
 function riskAction(){
     showScandalPopup("Риск! Бросьте кубик: 1-3 → -5, 4-6 → +5",0);
     document.getElementById("dice").onclick=()=>{
@@ -133,9 +163,11 @@ function riskAction(){
         showScandalPopup(`Выпало: ${dice}`,amount);
         updateHype();
         document.getElementById("dice").onclick=normalDiceClick;
+        socket.send(JSON.stringify({type:"dice", player:playerName, value:dice}));
     }
 }
 
+// Движение фишки
 function movePlayer(steps){
     if(gameEnded) return;
     let i=0;
@@ -143,11 +175,7 @@ function movePlayer(steps){
         if(i<steps){
             position++;
             if(position>=cells.length){
-                position=0;
-                rounds++;
-                hype+=7;
-                showFloatingHype(7);
-                updateHype();
+                position=0; rounds++; hype+=7; showFloatingHype(7); updateHype();
             }
             moveToCell(position);
             i++;
@@ -157,44 +185,13 @@ function movePlayer(steps){
     step();
 }
 
+// Кубик
 function normalDiceClick(){
     if(skipTurn){ showScandalPopup("Пропускаешь ход",0); skipTurn=false; return; }
     const dice=Math.floor(Math.random()*6)+1;
     showScandalPopup("Выпало: "+dice,0);
     movePlayer(dice);
+    socket.send(JSON.stringify({type:"dice", player:playerName, value:dice}));
 }
 
 document.getElementById("dice").onclick=normalDiceClick;
-
-const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
-const playerName = localStorage.getItem("name");
-const roomCode = localStorage.getItem("room");
-const playerColor = localStorage.getItem("color");
-
-// Отправляем на сервер при подключении
-socket.addEventListener('open', ()=> {
-    socket.send(JSON.stringify({type:"join", name:playerName, room:roomCode, color:playerColor}));
-});
-
-// Получаем сообщения от сервера
-socket.addEventListener('message', event => {
-    const data = JSON.parse(event.data);
-    if(data.type==="move"){
-        if(data.player!==playerName){
-            // Движение других игроков
-            const el = document.querySelector(`.player[data-name='${data.player}']`);
-            if(el){
-                el.style.left = data.position.x+"px";
-                el.style.top = data.position.y+"px";
-            }
-        }
-    }
-    if(data.type==="dice"){
-        if(data.player!==playerName){
-            // Результат кубика других игроков
-        }
-    }
-});
-
-socket.send(JSON.stringify({type:"move", player:playerName, position:{x:cells[position].x,y:cells[position].y}, hype:hype}));
-socket.send(JSON.stringify({type:"dice", player:playerName, value:dice}));
