@@ -1,58 +1,56 @@
-const express = require("express")
-const app = express()
-const http = require("http").createServer(app)
-const io = require("socket.io")(http)
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 
-app.use(express.static("public"))
+const app = express();
+app.use(express.static('public'));
 
-let rooms = {}
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-io.on("connection", (socket) => {
+let rooms = {}; // {roomCode: {players: [], states: []}}
 
-    socket.on("joinRoom", data => {
-        const {name, room, color} = data
+wss.on('connection', ws => {
+    ws.on('message', msg => {
+        const data = JSON.parse(msg);
 
-        if (!rooms[room]) rooms[room] = {players: [], turn: 0}
+        switch(data.type){
+            case "join":
+                if(!rooms[data.room]) rooms[data.room]={players:[], states:[]};
+                ws.room=data.room;
+                ws.name=data.name;
+                ws.color=data.color;
+                rooms[data.room].players.push(ws);
 
-        if (rooms[room].players.length >= 4) {
-            socket.emit("roomFull")
-            return
+                // Отправляем текущие состояния новым игрокам
+                rooms[data.room].players.forEach(p=>{
+                    p.send(JSON.stringify({type:"players", players:rooms[data.room].players.map(pl=>({name:pl.name,color:pl.color}))}));
+                });
+                break;
+
+            case "move":
+                // Рассылаем движение всем игрокам
+                rooms[data.room].players.forEach(p=>{
+                    p.send(JSON.stringify({type:"move", player:data.player, position:data.position, hype:data.hype}));
+                });
+                break;
+
+            case "dice":
+                // Рассылаем результат кубика всем
+                rooms[data.room].players.forEach(p=>{
+                    p.send(JSON.stringify({type:"dice", player:data.player, value:data.value}));
+                });
+                break;
         }
+    });
 
-        const player = {
-            id: socket.id,
-            name,
-            color,
-            position: 0,
-            hype: 0,
-            skip: false
+    ws.on('close', ()=>{
+        if(ws.room && rooms[ws.room]){
+            rooms[ws.room].players = rooms[ws.room].players.filter(p=>p!==ws);
         }
+    });
+});
 
-        rooms[room].players.push(player)
-        socket.join(room)
-        io.to(room).emit("updatePlayers", rooms[room].players)
-    })
-
-    socket.on("rollDice", room => {
-        const dice = Math.floor(Math.random() * 6) + 1
-        io.to(room).emit("diceResult", dice)
-    })
-
-    socket.on("move", data => {
-        const {room, playerId, position} = data
-        const player = rooms[room].players.find(p => p.id === playerId)
-        if (player) player.position = position
-        io.to(room).emit("updatePlayers", rooms[room].players)
-    })
-
-    socket.on("disconnecting", () => {
-        for (let room in rooms) {
-            rooms[room].players = rooms[room].players.filter(p => p.id !== socket.id)
-            io.to(room).emit("updatePlayers", rooms[room].players)
-        }
-    })
-
-})
-
-const PORT = process.env.PORT || 3000
-http.listen(PORT, () => console.log("Server started on port", PORT))
+server.listen(process.env.PORT || 3000, ()=>{
+    console.log("Server running on port 3000");
+});
