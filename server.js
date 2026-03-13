@@ -1,74 +1,94 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
+const express = require("express")
+const http = require("http")
+const WebSocket = require("ws")
 
-const app = express();
-app.use(express.static('public'));
+const app = express()
+app.use(express.static("public"))
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const server = http.createServer(app)
+const wss = new WebSocket.Server({ server })
 
-let rooms = {};
+let rooms = {}
 
-wss.on('connection', ws => {
-    ws.on('message', msg => {
-        const data = JSON.parse(msg);
+function broadcast(room, data){
+rooms[room].players.forEach(p=>{
+p.ws.send(JSON.stringify(data))
+})
+}
 
-        switch(data.type){
-            case "join":
-                if(!rooms[data.room]) rooms[data.room]={players:[]};
-                if(rooms[data.room].players.length >=4){
-                    ws.send(JSON.stringify({type:"full"}));
-                    ws.close();
-                    return;
-                }
-                ws.room=data.room;
-                ws.name=data.name;
-                ws.color=data.color;
-                ws.hype=0;
-                rooms[data.room].players.push(ws);
+wss.on("connection", ws=>{
 
-                const playersInfo = rooms[data.room].players.map(p=>({name:p.name,color:p.color,hype:p.hype}));
-                rooms[data.room].players.forEach(p=>{
-                    p.send(JSON.stringify({type:"players", players:playersInfo}));
-                });
-                break;
+ws.on("message", message=>{
 
-                case "startGame":
-    if(rooms[data.room].players.length>=2){
-        rooms[data.room].gameStarted=true;
-        rooms[data.room].players.forEach(p=>{
-            p.send(JSON.stringify({type:"gameStarted"}));
-        });
-    } else {
-        ws.send(JSON.stringify({type:"error","message":"Нужно минимум 2 игрока"}));
-    }
-    break;
+const data = JSON.parse(message)
 
-            case "move":
-                ws.hype=data.hype;
-                rooms[data.room].players.forEach(p=>{
-                    p.send(JSON.stringify({type:"move", player:data.player, position:data.position, hype:data.hype, color:ws.color}));
-                });
-                break;
+if(data.type==="join"){
 
-            case "dice":
-                rooms[data.room].players.forEach(p=>{
-                    p.send(JSON.stringify({type:"dice", player:data.player, value:data.value}));
-                });
-                break;
-        }
-    });
+if(!rooms[data.room]){
+rooms[data.room] = {
+players:[],
+started:false,
+turn:0
+}
+}
 
-    ws.on('close', ()=>{
-        if(ws.room && rooms[ws.room]){
-            rooms[ws.room].players = rooms[ws.room].players.filter(p=>p!==ws);
-            const playersInfo = rooms[ws.room].players.map(p=>({name:p.name,color:p.color,hype:p.hype}));
-            rooms[ws.room].players.forEach(p=>{
-                p.send(JSON.stringify({type:"players", players:playersInfo}));
-            });
-        }
-    });
-});
+const room = rooms[data.room]
 
-server.listen(process.env.PORT || 3000, ()=> console.log("Server running on port 3000"));
+if(room.players.length>=4){
+ws.send(JSON.stringify({type:"full"}))
+return
+}
+
+const player={
+name:data.name,
+color:data.color,
+hype:0,
+pos:0,
+ws:ws
+}
+
+ws.room=data.room
+ws.name=data.name
+
+room.players.push(player)
+
+broadcast(data.room,{
+type:"players",
+players:room.players.map(p=>({
+name:p.name,
+color:p.color,
+hype:p.hype
+}))
+})
+
+}
+
+if(data.type==="start"){
+
+const room = rooms[data.room]
+
+if(room.players.length<2){
+ws.send(JSON.stringify({
+type:"error",
+msg:"Нужно минимум 2 игрока"
+}))
+return
+}
+
+room.started=true
+
+broadcast(data.room,{
+type:"startGame",
+turn:room.players[0].name
+})
+
+}
+
+if(data.type==="move"){
+
+const room = rooms[ws.room]
+
+const player = room.players.find(p=>p.name===ws.name)
+
+player.pos=data.pos
+player
