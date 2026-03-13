@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
 
 <meta charset="UTF-8">
-<title>Разметка клеток</title>
+<title>LitmHype Игра</title>
 
 <style>
 
@@ -24,26 +25,25 @@ background-size:cover;
 border:3px solid white;
 }
 
-.dot{
-width:14px;
-height:14px;
-background:red;
+.player{
+width:28px;
+height:28px;
 border-radius:50%;
 position:absolute;
 transform:translate(-50%,-50%);
+transition:0.35s;
 }
+
+.yellow{background:yellow;}
+.red{background:red;}
+.blue{background:blue;}
+.purple{background:purple;}
 
 button{
-margin-top:15px;
-padding:10px 20px;
-font-size:18px;
+margin-top:20px;
+padding:12px 30px;
+font-size:20px;
 cursor:pointer;
-}
-
-#coords{
-width:90%;
-height:200px;
-margin-top:15px;
 }
 
 </style>
@@ -52,22 +52,21 @@ margin-top:15px;
 
 <body>
 
-<h2>Разметка координат клеток</h2>
+<h2>Litvin — Путь к хайпу</h2>
 
-<p>Кликай по центру каждой клетки по порядку</p>
+<div id="board">
 
-<div id="board"></div>
+<div id="player" class="player"></div>
 
-<br>
-
-<button onclick="copyCoords()">Скопировать координаты</button>
-<button onclick="resetCoords()">Сбросить</button>
+</div>
 
 <br>
 
-<textarea id="coords"></textarea>
+<button id="dice">Бросить кубик</button>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="game.js"></script>
 
 </body>
 </html>
+```
