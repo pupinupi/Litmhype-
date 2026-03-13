@@ -6,26 +6,36 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <h1>Литвин — Путь к хайпу</h1>
 
 <div id="lobbyContainer">
 <input type="text" id="name" placeholder="Ваше имя"><br>
 <input type="text" id="room" placeholder="Код комнаты"><br>
-<select id="color">
-    <option value="yellow">Жёлтая</option>
-    <option value="red">Красная</option>
-    <option value="blue">Синяя</option>
-    <option value="purple">Фиолетовая</option>
-</select><br>
+
+<div id="colors">
+    <div class="colorOption" style="background:yellow;" data-color="yellow"></div>
+    <div class="colorOption" style="background:red;" data-color="red"></div>
+    <div class="colorOption" style="background:blue;" data-color="blue"></div>
+    <div class="colorOption" style="background:purple;" data-color="purple"></div>
+</div>
+
 <button id="enter">Вход в комнату</button>
 </div>
 
 <script>
+let selectedColor="yellow";
+
+document.querySelectorAll(".colorOption").forEach(c=>{
+    c.onclick=()=>{
+        document.querySelectorAll(".colorOption").forEach(el=>el.classList.remove("selected"));
+        c.classList.add("selected");
+        selectedColor = c.getAttribute("data-color");
+    }
+});
+
 document.getElementById("enter").onclick = () => {
     const name = document.getElementById("name").value.trim();
     const room = document.getElementById("room").value.trim();
-    const color = document.getElementById("color").value;
 
     if(!name || !room){
         alert("Введите имя и код комнаты!");
@@ -34,7 +44,7 @@ document.getElementById("enter").onclick = () => {
 
     localStorage.setItem("name", name);
     localStorage.setItem("room", room);
-    localStorage.setItem("color", color);
+    localStorage.setItem("color", selectedColor);
 
     window.location.href = "room.html";
 }
