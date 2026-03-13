@@ -35,33 +35,6 @@
 
 <script>
 
-  socket.onmessage=e=>{
-
-const data=JSON.parse(e.data)
-
-if(data.type==="colorTaken"){
-alert("Этот цвет уже выбрал другой игрок")
-}
-
-if(data.type==="players"){
-
-let html="<h3>Игроки:</h3>"
-
-data.players.forEach(p=>{
-html+=`<div style="color:${p.color}">
-${p.name}
-</div>`
-})
-
-document.getElementById("players").innerHTML=html
-}
-
-if(data.type==="startGame"){
-location="room.html"
-}
-
-}
-
 let color="yellow"
 
 document.querySelectorAll(".color").forEach(c=>{
@@ -87,11 +60,16 @@ name:name,
 room:room,
 color:color
 }))
+
 }
 
 socket.onmessage=e=>{
 
 const data=JSON.parse(e.data)
+
+if(data.type==="colorTaken"){
+alert("Этот цвет уже выбран")
+}
 
 if(data.type==="players"){
 
@@ -99,7 +77,7 @@ let html="<h3>Игроки:</h3>"
 
 data.players.forEach(p=>{
 html+=`<div style="color:${p.color}">
-${p.name} (${p.hype})
+${p.name} | Хайп: ${p.hype}
 </div>`
 })
 
@@ -118,6 +96,7 @@ socket.send(JSON.stringify({
 type:"start",
 room:localStorage.getItem("room")
 }))
+
 }
 
 </script>
