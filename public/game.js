@@ -6,6 +6,15 @@ const color=localStorage.getItem("color")
 
 const board=document.getElementById("playersBoard")
 
+const dice=document.getElementById("dice")
+
+const card=document.getElementById("card")
+
+let pos=0
+let hype=0
+let myTurn=false
+
+// клетки поля
 const cells=[
 {x:103,y:600},
 {x:107,y:473},
@@ -29,9 +38,22 @@ const cells=[
 {x:213,y:615}
 ]
 
-let pos=0
-let hype=0
-let myTurn=false
+// типы клеток
+const cellType=[
+"start","+3","+2","scandal","risk","+2","scandal","+3","+5",
+"-15","skip","+3","risk","+3","skip","+2","scandal","+8","-10","+4"
+]
+
+// карточки
+const scandals=[
+["Перегрел аудиторию 🔥",-1],
+["Громкий заголовок 🫣",-2],
+["Это монтаж 😱",-3],
+["Меня взломали #",-3],
+["Подписчики в шоке 😮",-4],
+["Удаляй пока не поздно 🤫",-5],
+["Это контент 🙄",-5]
+]
 
 const player=document.createElement("div")
 player.className="player"
@@ -45,13 +67,81 @@ player.style.top=cells[pos].y+"px"
 
 move()
 
-document.getElementById("dice").onclick=()=>{
+function showCard(text){
+
+card.innerText=text
+card.style.display="block"
+
+setTimeout(()=>{
+card.style.display="none"
+},2500)
+
+}
+
+function applyCell(){
+
+const type=cellType[pos]
+
+if(type==="start"){
+hype+=15
+showCard("+15 хайпа")
+}
+
+if(type==="risk"){
+
+const r=Math.floor(Math.random()*6)+1
+
+if(r<=3){
+hype-=5
+showCard("Риск не удался -5")
+}else{
+hype+=5
+showCard("Риск удался +5")
+}
+
+}
+
+if(type==="scandal"){
+
+const s=scandals[Math.floor(Math.random()*scandals.length)]
+
+hype+=s[1]
+
+showCard(s[0]+" "+s[1])
+
+}
+
+if(type==="skip"){
+showCard("Пропуск хода")
+}
+
+if(type.includes("+")){
+hype+=parseInt(type)
+showCard("+"+type)
+}
+
+if(type.includes("-")){
+hype+=parseInt(type)
+showCard(type)
+}
+
+if(hype<0) hype=0
+
+if(hype>=70){
+showCard(name+" победил!")
+}
+
+}
+
+dice.onclick=()=>{
 
 if(!myTurn) return
 
-const dice=Math.floor(Math.random()*6)+1
+const roll=Math.floor(Math.random()*6)+1
 
-for(let i=0;i<dice;i++){
+dice.innerText=roll
+
+for(let i=0;i<roll;i++){
 
 setTimeout(()=>{
 
@@ -64,7 +154,9 @@ hype+=7
 
 move()
 
-if(i===dice-1){
+if(i===roll-1){
+
+applyCell()
 
 socket.send(JSON.stringify({
 type:"dice",
@@ -74,7 +166,7 @@ hype:hype
 
 }
 
-},i*400)
+},i*350)
 
 }
 
@@ -110,9 +202,9 @@ p.style.top=cells[data.pos].y+"px"
 
 if(data.type==="turn"){
 
-document.getElementById("turn").innerText="Ходит: "+data.player
+document.getElementById("turn").innerText="Ход: "+data.player
 
-myTurn = data.player===name
+myTurn=data.player===name
 
 }
 
@@ -122,7 +214,7 @@ let html=""
 
 data.players.forEach(p=>{
 html+=`<div style="color:${p.color}">
-${p.name}: ${p.hype}
+${p.name}: ${p.hype} хайпа
 </div>`
 })
 
