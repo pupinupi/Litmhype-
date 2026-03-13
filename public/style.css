@@ -1,160 +1,19 @@
-/* Общие стили */
-body{
-    margin:0;
-    padding:0;
-    font-family: Arial, sans-serif;
-    background:#111;
-    color:white;
-    text-align:center;
-}
-
-/* Лобби */
-#lobbyContainer{
-    margin-top:50px;
-}
-input{
-    font-size:22px;
-    padding:12px;
-    margin:12px;
-    width:300px;
-    border-radius:10px;
-    border:2px solid #fff;
-    background: rgba(255,255,255,0.1);
-    color:white;
-}
-input::placeholder{
-    color: #ddd;
-}
-button{
-    font-size:24px;
-    padding:12px 40px;
-    margin-top:20px;
-    border:none;
-    border-radius:10px;
-    background: linear-gradient(45deg,#ffcc00,#ff6600);
-    cursor:pointer;
-    color:white;
-    font-weight:bold;
-    box-shadow: 0 0 10px #000;
-}
-button:hover{
-    box-shadow: 0 0 20px #fff;
-}
-
-/* Выбор фишек кружочками */
-.colorOption{
-    display:inline-block;
-    width:50px;
-    height:50px;
-    border-radius:50%;
-    margin:10px;
-    cursor:pointer;
-    border:2px solid white;
-    transition:0.3s;
-}
-.colorOption.selected{
-    box-shadow: 0 0 20px #fff, 0 0 30px #0ff, 0 0 40px #0ff;
-}
-
-/* Игровое поле */
-#board{
-    position:relative;
-    width:1024px;
-    height:1024px;
-    margin:auto;
-    background-size:cover;
-    border:3px solid white;
-}
-.player{
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    position:absolute;
-    transform:translate(-50%,-50%);
-    transition:0.35s;
-}
-
-/* Кубик */
-#dice{
-    margin-top:20px;
-    padding:15px 30px;
-    font-size:22px;
-    cursor:pointer;
-    border:none;
-    border-radius:10px;
-    background:linear-gradient(45deg,#ffcc00,#ff6600);
-    color:white;
-    font-weight:bold;
-    box-shadow:0 0 10px #000;
-}
-
-/* Хайп-бар */
-#hypeContainer{
-    width:500px;
-    height:30px;
-    background:#333;
-    border-radius:15px;
-    margin:20px auto;
-    position:relative;
-}
-#hypeBar{
-    width:0%;
-    height:100%;
-    background: linear-gradient(90deg,#00ccff,#00aaff);
-    border-radius:15px;
-}
-#hypeText{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    color:white;
-    font-weight:bold;
-}
-
-/* Подсветка клетки неоном */
-.highlight{
-    position:absolute;
-    width:40px;
-    height:40px;
-    border-radius:50%;
-    pointer-events:none;
-    box-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff;
-}
-
-/* Плавающий +Хайп / -Хайп */
-.floatingHype{
-    position:absolute;
-    font-weight:bold;
-    font-size:20px;
-    text-shadow:1px 1px 5px #000;
-    pointer-events:none;
-}
-
-/* Всплывающее окно белым с свечением */
-.scandalPopup{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background:white;
-    color:#000;
-    font-size:28px;
-    font-weight:bold;
-    padding:30px 60px;
-    border-radius:20px;
-    box-shadow: 0 0 20px #fff, 0 0 40px #eee, 0 0 60px #ccc;
-    z-index:9999;
-    text-align:center;
-    animation: glowWhite 1.2s infinite alternate;
-}
-@keyframes glowWhite{
-    from{box-shadow:0 0 20px #fff, 0 0 40px #eee, 0 0 60px #ccc;}
-    to{box-shadow:0 0 30px #fff, 0 0 50px #eee, 0 0 80px #ccc;}
-}
-
-/* Анимация плавающего хайпа */
-@keyframes floatUp{
-    0%{opacity:1; transform:translate(-50%,0);}
-    100%{opacity:0; transform:translate(-50%,-30px);}
-}
+body{margin:0;font-family:sans-serif;background:black;color:white;}
+.lobby{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.lobby input{margin:5px;padding:8px;font-size:16px;width:200px;}
+.lobby button{padding:8px 16px;font-size:16px;cursor:pointer;}
+.colorSelect{display:flex;justify-content:center;margin:10px;}
+.colorCircle{width:30px;height:30px;border-radius:50%;margin:0 5px;cursor:pointer;}
+#boardContainer{position:relative;width:1024px;height:1024px;margin:auto;margin-top:20px;}
+.player{position:absolute;width:32px;height:32px;border-radius:50%;border:2px solid black;transition:all 0.4s;}
+#playerList{position:absolute;top:10px;right:10px;width:200px;background:rgba(0,0,0,0.5);padding:10px;border-radius:8px;}
+.playerInfo{margin-bottom:6px;font-size:14px;}
+.hypeBarSmall{height:6px;background:deepskyblue;border-radius:4px;margin-top:2px;}
+#dice{position:absolute;top:20px;left:20px;padding:10px 20px;font-size:16px;}
+#hypeBarContainer{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:300px;background:#333;height:20px;border-radius:10px;}
+#hypeBar{height:100%;background:deepskyblue;width:0%;border-radius:10px;}
+#hypeText{position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:bold;top:-25px;}
+.scandalPopup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;color:black;padding:15px;border-radius:10px;font-weight:bold;text-align:center;box-shadow:0 0 15px deepskyblue;animation:glow 1s infinite alternate;}
+@keyframes glow{0%{box-shadow:0 0 5px deepskyblue;}100%{box-shadow:0 0 20px deepskyblue;}}
+.floatingHype{position:absolute;font-weight:bold;font-size:16px;animation:floatUp 0.8s forwards;}
+@keyframes floatUp{0%{opacity:1;}100%{opacity:0;transform:translateY(-30px);}}
