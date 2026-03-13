@@ -165,3 +165,36 @@ function normalDiceClick(){
 }
 
 document.getElementById("dice").onclick=normalDiceClick;
+
+const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
+const playerName = localStorage.getItem("name");
+const roomCode = localStorage.getItem("room");
+const playerColor = localStorage.getItem("color");
+
+// Отправляем на сервер при подключении
+socket.addEventListener('open', ()=> {
+    socket.send(JSON.stringify({type:"join", name:playerName, room:roomCode, color:playerColor}));
+});
+
+// Получаем сообщения от сервера
+socket.addEventListener('message', event => {
+    const data = JSON.parse(event.data);
+    if(data.type==="move"){
+        if(data.player!==playerName){
+            // Движение других игроков
+            const el = document.querySelector(`.player[data-name='${data.player}']`);
+            if(el){
+                el.style.left = data.position.x+"px";
+                el.style.top = data.position.y+"px";
+            }
+        }
+    }
+    if(data.type==="dice"){
+        if(data.player!==playerName){
+            // Результат кубика других игроков
+        }
+    }
+});
+
+socket.send(JSON.stringify({type:"move", player:playerName, position:{x:cells[position].x,y:cells[position].y}, hype:hype}));
+socket.send(JSON.stringify({type:"dice", player:playerName, value:dice}));
