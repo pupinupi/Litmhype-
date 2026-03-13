@@ -2,19 +2,31 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>LitmHype</title>
+<title>LitmHype Game</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div id="boardContainer">
-    <img id="board" src="board.jpg" width="1024" height="1024">
-    <div id="playerList"></div>
+
+<div id="boardWrap">
+
+<img src="board.jpg" id="board">
+
+<div id="playersBoard"></div>
+
 </div>
+
+<div id="panel">
+
 <button id="dice">Бросить кубик</button>
-<div id="hypeBarContainer">
-    <div id="hypeBar"></div>
-    <span id="hypeText">0 / 70</span>
+
+<div id="turn"></div>
+
+<div id="score"></div>
+
 </div>
+
 <script src="game.js"></script>
+
 </body>
 </html>
