@@ -4,12 +4,7 @@ const name=localStorage.getItem("name")
 const room=localStorage.getItem("room")
 const color=localStorage.getItem("color")
 
-socket.send(JSON.stringify({
-type:"join",
-name:name,
-room:room,
-color:color
-}))
+const board=document.getElementById("playersBoard")
 
 const cells=[
 {x:103,y:600},
@@ -40,14 +35,11 @@ let hype=0
 const player=document.createElement("div")
 player.className="player"
 player.style.background=color
-
-document.getElementById("playersBoard").appendChild(player)
+board.appendChild(player)
 
 function move(){
-
 player.style.left=cells[pos].x+"px"
 player.style.top=cells[pos].y+"px"
-
 }
 
 move()
@@ -63,10 +55,8 @@ setTimeout(()=>{
 pos++
 
 if(pos>=cells.length){
-
 pos=0
 hype+=7
-
 }
 
 move()
@@ -104,7 +94,7 @@ p.className="player"
 p.id=data.name
 p.style.background=data.color
 
-document.getElementById("playersBoard").appendChild(p)
+board.appendChild(p)
 
 }
 
