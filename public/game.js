@@ -31,6 +31,7 @@ const cells=[
 
 let pos=0
 let hype=0
+let myTurn=false
 
 const player=document.createElement("div")
 player.className="player"
@@ -45,6 +46,8 @@ player.style.top=cells[pos].y+"px"
 move()
 
 document.getElementById("dice").onclick=()=>{
+
+if(!myTurn) return
 
 const dice=Math.floor(Math.random()*6)+1
 
@@ -108,6 +111,22 @@ p.style.top=cells[data.pos].y+"px"
 if(data.type==="turn"){
 
 document.getElementById("turn").innerText="Ходит: "+data.player
+
+myTurn = data.player===name
+
+}
+
+if(data.type==="players"){
+
+let html=""
+
+data.players.forEach(p=>{
+html+=`<div style="color:${p.color}">
+${p.name}: ${p.hype}
+</div>`
+})
+
+document.getElementById("score").innerHTML=html
 
 }
 
