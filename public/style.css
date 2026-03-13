@@ -1,3 +1,4 @@
+/* Общие стили */
 body{
     margin:0;
     padding:0;
@@ -11,7 +12,7 @@ body{
 #lobbyContainer{
     margin-top:50px;
 }
-input, select{
+input{
     font-size:22px;
     padding:12px;
     margin:12px;
@@ -40,6 +41,21 @@ button:hover{
     box-shadow: 0 0 20px #fff;
 }
 
+/* Выбор фишек кружочками */
+.colorOption{
+    display:inline-block;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    margin:10px;
+    cursor:pointer;
+    border:2px solid white;
+    transition:0.3s;
+}
+.colorOption.selected{
+    box-shadow: 0 0 20px #fff, 0 0 30px #0ff, 0 0 40px #0ff;
+}
+
 /* Игровое поле */
 #board{
     position:relative;
@@ -55,7 +71,6 @@ button:hover{
     border-radius:50%;
     position:absolute;
     transform:translate(-50%,-50%);
-    background:yellow;
     transition:0.35s;
 }
 
@@ -97,24 +112,49 @@ button:hover{
     font-weight:bold;
 }
 
-/* Popup карточки скандала */
+/* Подсветка клетки неоном */
+.highlight{
+    position:absolute;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    pointer-events:none;
+    box-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff;
+}
+
+/* Плавающий +Хайп / -Хайп */
+.floatingHype{
+    position:absolute;
+    font-weight:bold;
+    font-size:20px;
+    text-shadow:1px 1px 5px #000;
+    pointer-events:none;
+}
+
+/* Всплывающее окно белым с свечением */
 .scandalPopup{
     position:fixed;
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-    background:linear-gradient(45deg,#ff0000,#ff4444);
-    color:white;
+    background:white;
+    color:#000;
     font-size:28px;
     font-weight:bold;
     padding:30px 60px;
     border-radius:20px;
-    box-shadow: 0 0 20px #ff0000, 0 0 40px #ff5555, 0 0 60px #ff7777;
+    box-shadow: 0 0 20px #fff, 0 0 40px #eee, 0 0 60px #ccc;
     z-index:9999;
     text-align:center;
-    animation: glow 1.2s infinite alternate;
+    animation: glowWhite 1.2s infinite alternate;
 }
-@keyframes glow{
-    from{box-shadow: 0 0 20px #ff0000, 0 0 40px #ff5555, 0 0 60px #ff7777;}
-    to{box-shadow: 0 0 30px #ff0000, 0 0 50px #ff5555, 0 0 80px #ff7777;}
+@keyframes glowWhite{
+    from{box-shadow:0 0 20px #fff, 0 0 40px #eee, 0 0 60px #ccc;}
+    to{box-shadow:0 0 30px #fff, 0 0 50px #eee, 0 0 80px #ccc;}
+}
+
+/* Анимация плавающего хайпа */
+@keyframes floatUp{
+    0%{opacity:1; transform:translate(-50%,0);}
+    100%{opacity:0; transform:translate(-50%,-30px);}
 }
