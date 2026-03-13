@@ -16,10 +16,30 @@ const player = document.getElementById("player");
 const hypeBar = document.getElementById("hypeBar");
 const hypeTextLabel = document.getElementById("hypeText");
 
-let position=0, hype=0, skipTurn=false;
+let position=0, hype=0, skipTurn=false, rounds=0;
 
-// показать всплывающий +Хайп / -Хайп рядом с фишкой
+// показать правила перед игрой
+function showGameRules(){
+    const rules = `
+    <b>Правила "Литвин: Путь к хайпу"</b><br><br>
+    1. Цель: набрать 70 хайпа.<br>
+    2. Каждый ход бросаем кубик и двигаем фишку.<br>
+    3. Попадание на +Хайп / Скандал / Риск изменяет очки.<br>
+    4. За каждый полный круг +10 хайпа.<br>
+    5. Скандалы уменьшают хайп, могут пропустить ход.<br>
+    6. Риск: бросок кубика дает шанс +5 или -5.<br><br>
+    Удачи!
+    `;
+    const popup=document.createElement("div");
+    popup.className="scandalPopup";
+    popup.innerHTML=rules;
+    document.body.appendChild(popup);
+    setTimeout(()=>popup.remove(),6000);
+}
+
+// показать плавающий +Хайп / -Хайп
 function showFloatingHype(amount){
+    if(amount===0) return;
     const floatDiv = document.createElement("div");
     floatDiv.innerText = (amount>0?"+":"−")+Math.abs(amount);
     floatDiv.style.position="absolute";
@@ -43,13 +63,12 @@ function showFloatingHype(amount){
     }, 800);
 }
 
-// поставить фишку
+// подсветка клетки
 function moveToCell(i){
     const cell=cells[i];
     player.style.left=cell.x+"px";
     player.style.top=cell.y+"px";
 
-    // подсветка клетки
     const highlight=document.createElement("div");
     highlight.style.position="absolute";
     highlight.style.width="40px";
@@ -71,19 +90,23 @@ moveToCell(position);
 // обновление шкалы хайпа
 function updateHype(){
     if(hype<0) hype=0;
-    if(hype>100) hype=100;
-    const percent=(hype/100)*100;
+    if(hype>70) hype=70;
+    const percent=(hype/70)*70;
     hypeBar.style.width = percent + "%";
-    hypeTextLabel.innerText = `${hype} / 100`;
+    hypeTextLabel.innerText = `${hype} / 70`;
 }
 
-// показать карточку скандала с количеством
+// показать карточку скандала
 function showScandalPopup(text, amount){
     const popup=document.createElement("div");
     popup.className="scandalPopup";
-    popup.innerHTML=`${text} <br> ${amount>0?"+":"−"}${Math.abs(amount)} хайп`;
+    if(amount!==0){
+        popup.innerHTML=`${text} <br> ${amount>0?"+":"−"}${Math.abs(amount)} хайп`;
+        showFloatingHype(amount);
+    } else {
+        popup.innerHTML=text;
+    }
     document.body.appendChild(popup);
-    showFloatingHype(amount);
     setTimeout(()=>popup.remove(),2500);
 }
 
@@ -94,16 +117,13 @@ function applyCell(){
 
     let amount = 0;
 
-    if(action.includes("+")) { amount = parseInt(action); hype += amount; }
+    if(action.includes("+") && !action.includes("skip")) { amount = parseInt(action); hype += amount; }
     if(action.includes("-") && !action.includes("skip")) { amount = parseInt(action); hype += amount; }
     if(action==="skip") skipTurn=true;
-    if(action==="-8skip"){ amount = -8; hype -= 8; skipTurn=true; }
+    if(action==="-8skip"){ amount=-8; hype-=8; skipTurn=true; }
 
-    if(action==="risk"){
-        const roll=Math.floor(Math.random()*6)+1;
-        if(roll<=3){ amount=-5; hype-=5; showScandalPopup("Риск не удался", amount); }
-        else { amount=5; hype+=5; showScandalPopup("Риск удался", amount); }
-    } else if(action==="scandal"){
+    if(action==="risk"){ riskAction(); return; }
+    else if(action==="scandal"){
         const scandals=[
             {t:"Перегрел аудиторию 🔥",v:-1},
             {t:"Громкий заголовок 🫣",v:-2},
@@ -119,26 +139,44 @@ function applyCell(){
         if(s.skip) skipTurn=true;
         showScandalPopup(s.t, amount);
     } else {
-        // если обычное +хайп / -хайп
-        if(action!=="skip") showFloatingHype(amount);
+        showFloatingHype(amount);
     }
 
     updateHype();
 
-    if(hype>=100) showScandalPopup("🎉 ПОБЕДА! Ты набрал 100 хайпа! 🎉", 0);
+    if(hype>=70) showScandalPopup("🎉 ПОБЕДА! Ты набрал 700 хайпа! 🎉", 0);
 }
 
-// автоматическое движение фишки
+// Риск: шанс бросить кубик
+function riskAction(){
+    showScandalPopup("Риск! Бросьте кубик: 1-3 → -5, 4-6 → +5", 0);
+    document.getElementById("dice").onclick = () => {
+        const dice = Math.floor(Math.random()*6)+1;
+        let amount = (dice<=3)?-5:5;
+        hype += amount;
+        showScandalPopup(`Выпало: ${dice}`, amount);
+        updateHype();
+        document.getElementById("dice").onclick = normalDiceClick;
+    }
+}
+
+// движение фишки
 function movePlayer(steps){
     let i=0;
     function step(){
         if(i<steps){
             position++;
-            if(position>=cells.length) position=0;
+            if(position>=cells.length){
+                position=0;
+                rounds++;
+                hype+=10;
+                showFloatingHype(10);
+                updateHype();
+            }
             moveToCell(position);
             i++;
             setTimeout(step,400);
-        }else{
+        } else {
             applyCell();
         }
     }
@@ -146,9 +184,11 @@ function movePlayer(steps){
 }
 
 // кнопка кубика
-document.getElementById("dice").onclick=()=>{
+function normalDiceClick(){
     if(skipTurn){ showScandalPopup("Пропускаешь ход",0); skipTurn=false; return; }
-    const dice=Math.floor(Math.random()*6)+1;
-    showScandalPopup("Выпало: "+dice,dice);
+    const dice = Math.floor(Math.random()*6)+1;
+    showScandalPopup("Выпало: "+dice,0);
     movePlayer(dice);
 }
+
+document.getElementById("dice").onclick = normalDiceClick;
