@@ -65,14 +65,8 @@ function moveToCell(i){
     const cell=cells[i];
     player.style.left=cell.x+"px";
     player.style.top=cell.y+"px";
-    const highlight=document.createElement("div");
-    highlight.className="highlight";
-    highlight.style.left=cell.x+"px";
-    highlight.style.top=cell.y+"px";
-    document.getElementById("board").appendChild(highlight);
-    setTimeout(()=>highlight.remove(),350);
+    // Подсветка убрана
 }
-
 moveToCell(position);
 
 function showScandalPopup(text,amount){
