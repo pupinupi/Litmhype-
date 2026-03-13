@@ -1,13 +1,12 @@
 {
   "name": "Litmhype",
   "version": "1.0.0",
-  "description": "Litvin hype board game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.7.2"
+    "ws": "^8.13.0"
   }
 }
