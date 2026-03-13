@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>LitmHype Игра</title>
+<title>Litvin Hype</title>
 
 <style>
 
@@ -26,23 +26,19 @@ border:3px solid white;
 }
 
 .player{
-width:28px;
-height:28px;
+width:32px;
+height:32px;
 border-radius:50%;
 position:absolute;
 transform:translate(-50%,-50%);
+background:yellow;
 transition:0.35s;
 }
 
-.yellow{background:yellow;}
-.red{background:red;}
-.blue{background:blue;}
-.purple{background:purple;}
-
-button{
+#dice{
 margin-top:20px;
-padding:12px 30px;
-font-size:20px;
+padding:15px 30px;
+font-size:22px;
 cursor:pointer;
 }
 
@@ -52,7 +48,7 @@ cursor:pointer;
 
 <body>
 
-<h2>Litvin — Путь к хайпу</h2>
+<h2>Литвин — Путь к хайпу</h2>
 
 <div id="board">
 
@@ -62,9 +58,10 @@ cursor:pointer;
 
 <br>
 
-<button id="dice">Бросить кубик</button>
+<button id="dice">🎲 Бросить кубик</button>
 
-<script src="/socket.io/socket.io.js"></script>
+<h3 id="hype">Хайп: 0</h3>
+
 <script src="game.js"></script>
 
 </body>
