@@ -67,20 +67,24 @@ function applyCell(){
     }
 
     if(action==="scandal"){
-        const scandals=[
-            {t:"Перегрел аудиторию 🔥",v:-1},
-            {t:"Громкий заголовок 🫣",v:-2},
-            {t:"Это монтаж 😱",v:-3},
-            {t:"Меня взломали #️⃣",v:-3},
-            {t:"Подписчики в шоке 😮",v:-4},
-            {t:"Удаляй пока не поздно 🤫",v:-5},
-            {t:"Это контент 🙄 (пропусти ход)",v:-5,skip:true}
-        ];
-        const s = scandals[Math.floor(Math.random()*scandals.length)];
-        alert(s.t);
-        hype += s.v;
-        if(s.skip) skipTurn = true;
-    }
+    const scandals=[
+        {t:"Перегрел аудиторию 🔥",v:-1},
+        {t:"Громкий заголовок 🫣",v:-2},
+        {t:"Это монтаж 😱",v:-3},
+        {t:"Меня взломали #️⃣",v:-3},
+        {t:"Подписчики в шоке 😮",v:-4},
+        {t:"Удаляй пока не поздно 🤫",v:-5},
+        {t:"Это контент 🙄 (пропусти ход)",v:-5,skip:true}
+    ];
+
+    const s = scandals[Math.floor(Math.random()*scandals.length)];
+    // цвет в зависимости от плюса/минуса
+    const sign = s.v>=0?"+":"";
+    alert(`${s.t}\n${sign}${s.v} хайп`);
+    
+    hype += s.v;
+    if(s.skip) skipTurn = true;
+}
 
     if(hype<0) hype=0;
     hypeText.innerText = "Хайп: "+hype;
