@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="lobbyList"></div>
+<button id="startBtn">Начать игру</button>
 <div class="lobby">
     <h1>LitmHype</h1>
     <input id="name" placeholder="Имя игрока" maxlength="12">
@@ -18,6 +20,26 @@
     </div>
     <button id="joinBtn">Войти</button>
 </div>
+
+    const startBtn=document.getElementById("startBtn");
+const lobbyList=document.getElementById("lobbyList");
+
+socket.addEventListener('message', event=>{
+    const data=JSON.parse(event.data);
+    if(data.type==="players"){
+        lobbyList.innerHTML="<b>Игроки в комнате:</b><br>";
+        data.players.forEach(p=>{
+            lobbyList.innerHTML+=`<span style="color:${p.color}">${p.name}</span><br>`;
+        });
+    }
+    if(data.type==="gameStarted"){
+        window.location="room.html";
+    }
+});
+
+startBtn.onclick=()=>{
+    socket.send(JSON.stringify({type:"startGame", room:localStorage.getItem("room")}));
+};
 
 <script>
 let chosenColor = "yellow";
