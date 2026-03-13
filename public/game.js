@@ -84,13 +84,26 @@ function applyCell(){
     if(gameEnded) return;
     const action=cellActions[position];
     let amount=0;
-    if(action.includes("+") && !action.includes("skip")){ amount=parseInt(action); hype+=amount; }
-    if(action.includes("-") && !action.includes("skip")){ amount=parseInt(action); hype+=amount; }
-    if(action==="skip") skipTurn=true;
-    if(action==="-8skip"){ amount=-8; hype-=8; skipTurn=true; }
 
-    if(action==="risk"){ riskAction(); return; }
-    else if(action==="scandal"){
+    if(action==="start"){
+        amount=15;
+        hype+=15;
+        showFloatingHype(amount);
+    } else if(action.includes("+") && !action.includes("skip")){ 
+        amount=parseInt(action); 
+        hype+=amount; 
+    } else if(action.includes("-") && !action.includes("skip")){ 
+        amount=parseInt(action); 
+        hype+=amount; 
+    } else if(action==="skip") skipTurn=true;
+    else if(action==="-8skip"){ 
+        amount=-8; 
+        hype-=8; 
+        skipTurn=true;
+    } else if(action==="risk"){ 
+        riskAction(); 
+        return; 
+    } else if(action==="scandal"){
         const scandals=[
             {t:"Перегрел аудиторию 🔥",v:-1},
             {t:"Громкий заголовок 🫣",v:-2},
@@ -109,6 +122,7 @@ function applyCell(){
 
     updateHype();
 }
+    
 
 function riskAction(){
     showScandalPopup("Риск! Бросьте кубик: 1-3 → -5, 4-6 → +5",0);
