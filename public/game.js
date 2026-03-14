@@ -7,11 +7,10 @@ const color = localStorage.getItem("color")
 const board = document.getElementById("playersBoard")
 const dice = document.getElementById("dice")
 
-let players = {}
-let myTurn = false
+let players={}
+let myTurn=false
 
-// координаты клеток
-const cells = [
+const cells=[
 {x:103,y:600},
 {x:107,y:473},
 {x:100,y:353},
@@ -34,8 +33,7 @@ const cells = [
 {x:213,y:615}
 ]
 
-// после подключения — снова заходим в комнату
-socket.onopen = () => {
+socket.onopen=()=>{
 
 socket.send(JSON.stringify({
 type:"join",
@@ -46,18 +44,18 @@ color:color
 
 }
 
-// создание фишки
+// создать фишку
 function createPlayer(p){
 
-const el = document.createElement("div")
+const el=document.createElement("div")
 
-el.className = "player"
-el.style.background = p.color
-el.id = "player_"+p.name
+el.className="player"
+el.style.background=p.color
+el.id="player_"+p.name
 
 board.appendChild(el)
 
-players[p.name] = {
+players[p.name]={
 pos:0,
 hype:p.hype,
 el:el
@@ -67,26 +65,52 @@ movePlayer(p.name)
 
 }
 
-// движение
+// переместить фишку
 function movePlayer(playerName){
 
-const p = players[playerName]
+const p=players[playerName]
 
 if(!p) return
 
-const c = cells[p.pos]
+const c=cells[p.pos]
 
-p.el.style.left = c.x + "px"
-p.el.style.top = c.y + "px"
+p.el.style.left=c.x+"px"
+p.el.style.top=c.y+"px"
+
+}
+
+// всплывающий хайп
+function showHype(name,value){
+
+const p=players[name]
+
+const el=document.createElement("div")
+
+el.className="hypeFloat"
+
+el.innerText=(value>0?"+":"")+value
+
+el.style.color=value>0?"#00ff88":"#ff4444"
+
+el.style.left=p.el.style.left
+el.style.top=p.el.style.top
+
+board.appendChild(el)
+
+setTimeout(()=>el.remove(),1000)
 
 }
 
 // бросок кубика
-dice.onclick = ()=>{
+dice.onclick=()=>{
 
 if(!myTurn) return
 
-const roll = Math.floor(Math.random()*6)+1
+dice.innerText="🎲..."
+
+setTimeout(()=>{
+
+const roll=Math.floor(Math.random()*6)+1
 
 dice.innerText="🎲 "+roll
 
@@ -95,17 +119,19 @@ type:"dice",
 roll:roll
 }))
 
+},400)
+
 }
 
-// сообщения
-socket.onmessage = e => {
+socket.onmessage=e=>{
 
-const data = JSON.parse(e.data)
+const data=JSON.parse(e.data)
 
 // список игроков
 if(data.type==="players"){
 
 document.getElementById("score").innerHTML=""
+document.getElementById("hypeBars").innerHTML=""
 
 data.players.forEach(p=>{
 
@@ -115,7 +141,14 @@ createPlayer(p)
 
 document.getElementById("score").innerHTML+=`
 <div style="color:${p.color}">
-${p.name}: ${p.hype} / 70
+${p.name}: ${p.hype}/70
+</div>
+`
+
+document.getElementById("hypeBars").innerHTML+=`
+<div>${p.name}</div>
+<div class="hypeBar">
+<div class="hypeFill" style="width:${p.hype/70*100}%"></div>
 </div>
 `
 
@@ -130,19 +163,37 @@ if(!players[data.name]){
 createPlayer(data)
 }
 
-players[data.name].pos = data.pos
-players[data.name].hype = data.hype
+players[data.name].pos=data.pos
+players[data.name].hype=data.hype
 
 movePlayer(data.name)
 
+if(data.hypeChange){
+showHype(data.name,data.hypeChange)
 }
 
-// чей ход
+if(data.scandalCard){
+
+const card=document.getElementById("card")
+
+card.innerText="СКАНДАЛ\n"+data.scandalCard.text
+
+card.style.display="block"
+
+setTimeout(()=>{
+card.style.display="none"
+},2500)
+
+}
+
+}
+
+// ход
 if(data.type==="turn"){
 
 document.getElementById("turn").innerText="Ход: "+data.player
 
-myTurn = data.player === name
+myTurn=data.player===name
 
 }
 
