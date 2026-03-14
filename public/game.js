@@ -8,13 +8,10 @@ const board=document.getElementById("playersBoard")
 
 const dice=document.getElementById("dice")
 
-const card=document.getElementById("card")
-
-let pos=0
-let hype=0
+let players={}
 let myTurn=false
 
-// клетки поля
+// координаты клеток
 const cells=[
 {x:103,y:600},
 {x:107,y:473},
@@ -38,98 +35,44 @@ const cells=[
 {x:213,y:615}
 ]
 
-// типы клеток
-const cellType=[
-"start","+3","+2","scandal","risk","+2","scandal","+3","+5",
-"-15","skip","+3","risk","+3","skip","+2","scandal","+8","-10","+4"
-]
-
-// карточки
-const scandals=[
-["Перегрел аудиторию 🔥",-1],
-["Громкий заголовок 🫣",-2],
-["Это монтаж 😱",-3],
-["Меня взломали #",-3],
-["Подписчики в шоке 😮",-4],
-["Удаляй пока не поздно 🤫",-5],
-["Это контент 🙄",-5]
-]
-
-const player=document.createElement("div")
-player.className="player"
-player.style.background=color
-board.appendChild(player)
-
-function move(){
-player.style.left=cells[pos].x+"px"
-player.style.top=cells[pos].y+"px"
+// отправляем join
+socket.onopen=()=>{
+socket.send(JSON.stringify({
+type:"join",
+name:name,
+room:room,
+color:color
+}))
 }
 
-move()
+function createPlayer(p){
 
-function showCard(text){
+let el=document.createElement("div")
 
-card.innerText=text
-card.style.display="block"
+el.className="player"
+el.id="player_"+p.name
+el.style.background=p.color
 
-setTimeout(()=>{
-card.style.display="none"
-},2500)
+board.appendChild(el)
+
+players[p.name]={
+pos:0,
+hype:p.hype,
+el:el
+}
+
+movePlayer(p.name)
 
 }
 
-function applyCell(){
+function movePlayer(playerName){
 
-const type=cellType[pos]
+const p=players[playerName]
 
-if(type==="start"){
-hype+=15
-showCard("+15 хайпа")
-}
+const c=cells[p.pos]
 
-if(type==="risk"){
-
-const r=Math.floor(Math.random()*6)+1
-
-if(r<=3){
-hype-=5
-showCard("Риск не удался -5")
-}else{
-hype+=5
-showCard("Риск удался +5")
-}
-
-}
-
-if(type==="scandal"){
-
-const s=scandals[Math.floor(Math.random()*scandals.length)]
-
-hype+=s[1]
-
-showCard(s[0]+" "+s[1])
-
-}
-
-if(type==="skip"){
-showCard("Пропуск хода")
-}
-
-if(type.includes("+")){
-hype+=parseInt(type)
-showCard("+"+type)
-}
-
-if(type.includes("-")){
-hype+=parseInt(type)
-showCard(type)
-}
-
-if(hype<0) hype=0
-
-if(hype>=70){
-showCard(name+" победил!")
-}
+p.el.style.left=c.x+"px"
+p.el.style.top=c.y+"px"
 
 }
 
@@ -139,7 +82,9 @@ if(!myTurn) return
 
 const roll=Math.floor(Math.random()*6)+1
 
-dice.innerText=roll
+dice.innerText="🎲 "+roll
+
+let pos=players[name].pos
 
 for(let i=0;i<roll;i++){
 
@@ -149,19 +94,19 @@ pos++
 
 if(pos>=cells.length){
 pos=0
-hype+=7
+players[name].hype+=7
 }
 
-move()
+players[name].pos=pos
+
+movePlayer(name)
 
 if(i===roll-1){
-
-applyCell()
 
 socket.send(JSON.stringify({
 type:"dice",
 pos:pos,
-hype:hype
+hype:players[name].hype
 }))
 
 }
@@ -176,49 +121,45 @@ socket.onmessage=e=>{
 
 const data=JSON.parse(e.data)
 
+// список игроков
+if(data.type==="players"){
+
+document.getElementById("score").innerHTML=""
+
+data.players.forEach(p=>{
+
+if(!players[p.name]){
+
+createPlayer(p)
+
+}
+
+document.getElementById("score").innerHTML+=`
+<div style="color:${p.color}">
+${p.name}: ${p.hype}
+</div>
+`
+
+})
+
+}
+
+// движение игроков
 if(data.type==="move"){
 
-if(data.name!==name){
+players[data.name].pos=data.pos
+players[data.name].hype=data.hype
 
-let p=document.getElementById(data.name)
-
-if(!p){
-
-p=document.createElement("div")
-p.className="player"
-p.id=data.name
-p.style.background=data.color
-
-board.appendChild(p)
+movePlayer(data.name)
 
 }
 
-p.style.left=cells[data.pos].x+"px"
-p.style.top=cells[data.pos].y+"px"
-
-}
-
-}
-
+// очередь
 if(data.type==="turn"){
 
 document.getElementById("turn").innerText="Ход: "+data.player
 
 myTurn=data.player===name
-
-}
-
-if(data.type==="players"){
-
-let html=""
-
-data.players.forEach(p=>{
-html+=`<div style="color:${p.color}">
-${p.name}: ${p.hype} хайпа
-</div>`
-})
-
-document.getElementById("score").innerHTML=html
 
 }
 
