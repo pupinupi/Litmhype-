@@ -89,13 +89,23 @@ started:false
 const room=rooms[data.room]
 
 // если игрок уже есть
-let existing=room.players.find(p=>p.name===data.name)
+let existing = room.players.find(p => p.name === data.name)
 
 if(existing){
 
-existing.ws=ws
-ws.room=data.room
-ws.name=data.name
+existing.ws = ws
+ws.room = data.room
+ws.name = data.name
+
+// ВАЖНО: снова отправляем список игроков
+broadcast(data.room,{
+type:"players",
+players:room.players.map(p=>({
+name:p.name,
+color:p.color,
+hype:p.hype
+}))
+})
 
 return
 
