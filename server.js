@@ -48,26 +48,71 @@ function nextTurn(room){
 wss.on("connection", ws => {
   ws.on("message", msg => {
     let data;
-    try{ data = JSON.parse(msg); }catch{return;}
+    try{ data = JSON.parse(msg); }catch{
 
-    // JOIN
-    if(data.type==="join"){
-      if(!rooms[data.room]) rooms[data.room] = {players:[], turn:0, started:false};
-      const room = rooms[data.room];
+      if(data.type==="join"){
 
-      if(room.players.length >= 4){ ws.send(JSON.stringify({type:"full"})); return;}
-      if(room.players.find(p=>p.color===data.color)){ ws.send(JSON.stringify({type:"colorTaken"})); return;}
+if(!rooms[data.room]){
 
-      const player = {name:data.name, color:data.color, pos:0, hype:0, skip:false, ws:ws, laps:0};
-      ws.room = data.room; ws.name = data.name;
-      room.players.push(player);
+rooms[data.room]={
+players:[],
+turn:0,
+started:false
+}
 
-      broadcast(data.room,{
-        type:"players",
-        players:room.players.map(p=>({name:p.name,color:p.color,hype:p.hype}))
-      });
-    }
+}
 
+const room=rooms[data.room]
+
+// если игрок уже есть — просто обновляем websocket
+let existing=room.players.find(p=>p.name===data.name)
+
+if(existing){
+
+existing.ws=ws
+ws.room=data.room
+ws.name=data.name
+
+return
+
+}
+
+// максимум 4 игрока
+if(room.players.length>=4){
+ws.send(JSON.stringify({type:"full"}))
+return
+}
+
+// цвет занят
+if(room.players.find(p=>p.color===data.color)){
+ws.send(JSON.stringify({type:"colorTaken"}))
+return
+}
+
+const player={
+name:data.name,
+color:data.color,
+pos:0,
+hype:0,
+skip:false,
+ws:ws
+}
+
+ws.room=data.room
+ws.name=data.name
+
+room.players.push(player)
+
+broadcast(data.room,{
+type:"players",
+players:room.players.map(p=>({
+name:p.name,
+color:p.color,
+hype:p.hype
+}))
+})
+
+}
     // START
     if(data.type==="start"){
       const room = rooms[data.room];
