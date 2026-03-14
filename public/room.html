@@ -1,28 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
-<title>LitmHype</title>
+<title>Litvin — Путь к хайпу</title>
+
 <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
+
 <div id="game">
-  <div id="boardWrap">
-    <img src="board.jpg" id="board">
-    <div id="playersBoard"></div>
-  </div>
-  <div id="ui">
-    <div id="turn"></div>
-    <div id="score"></div>
-    <button id="dice">🎲 Бросить кубик</button>
-  </div>
+
+<div id="boardWrap">
+
+<img src="board.jpg" id="board">
+
+<div id="playersBoard"></div>
+
 </div>
 
-<div id="scandalPopup" class="popup">
-  <div id="scandalText"></div>
-  <button onclick="closeScandal()">OK</button>
+<div id="ui">
+
+<div id="turn">Ожидание игроков...</div>
+
+<div id="score"></div>
+
+<div id="hypeBars"></div>
+
+<button id="dice">🎲 Бросить кубик</button>
+
 </div>
+
+</div>
+
+<div id="card"></div>
 
 <script src="game.js"></script>
+
 </body>
 </html>
