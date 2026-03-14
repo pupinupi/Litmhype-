@@ -1,6 +1,7 @@
 const socket=new WebSocket(location.origin.replace("http","ws"))
 
 let color=null
+let playersDiv=document.getElementById("players")
 
 document.querySelectorAll(".color").forEach(c=>{
   c.onclick=()=>{
@@ -39,9 +40,14 @@ socket.onmessage=e=>{
   if(data.type==="players"){
     let html="<h3>Игроки</h3>"
     data.players.forEach(p=>{
-      html+=`<div style="color:${p.color}">${p.name}</div>`
+      html+=`
+      <div style="color:${p.color}; display:flex; align-items:center; margin:4px 0;">
+        <div style="width:20px; height:20px; background:${p.color}; border-radius:50%; margin-right:6px;"></div>
+        ${p.name}
+      </div>
+      `
     })
-    document.getElementById("players").innerHTML=html
+    playersDiv.innerHTML=html
   }
 
   if(data.type==="startGame"){
