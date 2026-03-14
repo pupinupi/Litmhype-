@@ -7,15 +7,11 @@ margin:0;
 overflow-x:hidden;
 }
 
-/* контейнер игры */
-
 #game{
 display:flex;
 flex-direction:column;
 align-items:center;
 }
-
-/* поле */
 
 #boardWrap{
 position:relative;
@@ -29,8 +25,6 @@ border-radius:10px;
 box-shadow:0 0 40px cyan;
 }
 
-/* фишки */
-
 .player{
 width:28px;
 height:28px;
@@ -41,22 +35,16 @@ transform:translate(-50%,-50%);
 transition:0.35s;
 }
 
-/* панель */
-
 #ui{
 margin-top:15px;
 width:90%;
 max-width:400px;
 }
 
-/* очередь */
-
 #turn{
 font-size:20px;
 margin-bottom:10px;
 }
-
-/* счет */
 
 #score{
 margin-bottom:15px;
@@ -65,8 +53,6 @@ margin-bottom:15px;
 #score div{
 margin:5px 0;
 }
-
-/* кубик */
 
 #dice{
 width:100%;
@@ -82,4 +68,28 @@ cursor:pointer;
 
 #dice:hover{
 box-shadow:0 0 35px cyan;
+}
+
+#colors{
+display:flex;
+justify-content:center;
+gap:15px;
+margin:10px 0;
+}
+
+.color{
+width:40px;
+height:40px;
+border-radius:50%;
+cursor:pointer;
+border:3px solid white;
+}
+
+.color[data-color="yellow"]{background:yellow}
+.color[data-color="red"]{background:red}
+.color[data-color="blue"]{background:blue}
+.color[data-color="purple"]{background:purple}
+
+.selected{
+box-shadow:0 0 15px white;
 }
