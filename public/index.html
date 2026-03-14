@@ -8,98 +8,30 @@
 
 <body>
 
-<div class="lobby">
-
-<h1>LitmHype</h1>
+<h1>Litvin — Путь к хайпу</h1>
 
 <input id="name" placeholder="Имя">
 
 <input id="room" placeholder="Код комнаты">
 
-<div class="colors">
+<h3>Выберите фишку</h3>
 
-<div class="color" data="yellow" style="background:yellow"></div>
-<div class="color" data="red" style="background:red"></div>
-<div class="color" data="blue" style="background:blue"></div>
-<div class="color" data="purple" style="background:purple"></div>
+<div id="colors">
+
+<div class="color" data-color="yellow"></div>
+<div class="color" data-color="red"></div>
+<div class="color" data-color="blue"></div>
+<div class="color" data-color="purple"></div>
 
 </div>
 
-<button id="join">Подключиться</button>
+<button id="join">Войти</button>
 
 <div id="players"></div>
 
 <button id="start">Начать игру</button>
 
-</div>
-
-<script>
-
-let color="yellow"
-
-document.querySelectorAll(".color").forEach(c=>{
-c.onclick=()=>{
-color=c.getAttribute("data")
-}
-})
-
-const socket=new WebSocket(location.origin.replace("http","ws"))
-
-document.getElementById("join").onclick=()=>{
-
-const name=document.getElementById("name").value
-const room=document.getElementById("room").value
-
-localStorage.setItem("name",name)
-localStorage.setItem("room",room)
-localStorage.setItem("color",color)
-
-socket.send(JSON.stringify({
-type:"join",
-name:name,
-room:room,
-color:color
-}))
-
-}
-
-socket.onmessage=e=>{
-
-const data=JSON.parse(e.data)
-
-if(data.type==="colorTaken"){
-alert("Этот цвет уже выбран")
-}
-
-if(data.type==="players"){
-
-let html="<h3>Игроки:</h3>"
-
-data.players.forEach(p=>{
-html+=`<div style="color:${p.color}">
-${p.name} | Хайп: ${p.hype}
-</div>`
-})
-
-document.getElementById("players").innerHTML=html
-}
-
-if(data.type==="startGame"){
-location="room.html"
-}
-
-}
-
-document.getElementById("start").onclick=()=>{
-
-socket.send(JSON.stringify({
-type:"start",
-room:localStorage.getItem("room")
-}))
-
-}
-
-</script>
+<script src="lobby.js"></script>
 
 </body>
 </html>
