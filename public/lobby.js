@@ -1,29 +1,35 @@
-const socket=new WebSocket(location.origin.replace("http","ws"))
+const socket = new WebSocket(location.origin.replace(/^http/, "ws"))
 
-let color=null
+let color = null
 
 document.querySelectorAll(".color").forEach(c=>{
 
-c.onclick=()=>{
+c.onclick = ()=>{
 
-document.querySelectorAll(".color").forEach(x=>x.classList.remove("selected"))
+document.querySelectorAll(".color").forEach(x=>{
+x.classList.remove("selected")
+})
 
 c.classList.add("selected")
-
-color=c.dataset.color
+color = c.dataset.color
 
 }
 
 })
 
-document.getElementById("join").onclick=()=>{
+document.getElementById("join").onclick = ()=>{
 
-const name=document.getElementById("name").value
-const room=document.getElementById("room").value
+const name = document.getElementById("name").value.trim()
+const room = document.getElementById("room").value.trim()
 
-localStorage.setItem("name",name)
-localStorage.setItem("room",room)
-localStorage.setItem("color",color)
+if(!name || !room || !color){
+alert("Введите имя, комнату и выберите фишку")
+return
+}
+
+localStorage.setItem("name", name)
+localStorage.setItem("room", room)
+localStorage.setItem("color", color)
 
 socket.send(JSON.stringify({
 type:"join",
@@ -34,7 +40,7 @@ color:color
 
 }
 
-document.getElementById("start").onclick=()=>{
+document.getElementById("start").onclick = ()=>{
 
 socket.send(JSON.stringify({
 type:"start",
@@ -43,26 +49,32 @@ room:localStorage.getItem("room")
 
 }
 
-socket.onmessage=e=>{
+socket.onmessage = e=>{
 
-const data=JSON.parse(e.data)
+const data = JSON.parse(e.data)
 
-if(data.type==="players"){
+if(data.type === "players"){
 
-let html="<h3>Игроки</h3>"
+let html = "<h3>Игроки</h3>"
 
 data.players.forEach(p=>{
-html+=`<div style="color:${p.color}">${p.name}</div>`
+html += `<div style="color:${p.color}">${p.name}</div>`
 })
 
-document.getElementById("players").innerHTML=html
+document.getElementById("players").innerHTML = html
 
 }
 
-if(data.type==="startGame"){
+if(data.type === "startGame"){
+location = "room.html"
+}
 
-location="room.html"
+if(data.type === "colorTaken"){
+alert("Эта фишка занята")
+}
 
+if(data.type === "full"){
+alert("Комната заполнена")
 }
 
 }
