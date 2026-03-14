@@ -10,27 +10,12 @@ const wss = new WebSocket.Server({ server })
 
 let rooms = {}
 
-function sendPlayers(room){
-
-const players = rooms[room].players.map(p=>({
-name:p.name,
-color:p.color,
-hype:p.hype
-}))
-
-rooms[room].players.forEach(p=>{
-p.ws.send(JSON.stringify({
-type:"players",
-players:players
-}))
-})
-
-}
-
 function broadcast(room,data){
+
 rooms[room].players.forEach(p=>{
 p.ws.send(JSON.stringify(data))
 })
+
 }
 
 wss.on("connection",ws=>{
@@ -42,23 +27,25 @@ const data = JSON.parse(msg)
 if(data.type==="join"){
 
 if(!rooms[data.room]){
+
 rooms[data.room]={
 players:[],
 turn:0,
 started:false
 }
+
 }
 
-const room = rooms[data.room]
+const room=rooms[data.room]
 
+// максимум 4 игрока
 if(room.players.length>=4){
 ws.send(JSON.stringify({type:"full"}))
 return
 }
 
-const colorUsed = room.players.find(p=>p.color===data.color)
-
-if(colorUsed){
+// проверка цвета
+if(room.players.find(p=>p.color===data.color)){
 ws.send(JSON.stringify({type:"colorTaken"}))
 return
 }
@@ -66,8 +53,8 @@ return
 const player={
 name:data.name,
 color:data.color,
-pos:0,
 hype:0,
+pos:0,
 ws:ws
 }
 
@@ -76,7 +63,14 @@ ws.name=data.name
 
 room.players.push(player)
 
-sendPlayers(data.room)
+broadcast(data.room,{
+type:"players",
+players:room.players.map(p=>({
+name:p.name,
+color:p.color,
+hype:p.hype
+}))
+})
 
 }
 
@@ -85,7 +79,6 @@ if(data.type==="start"){
 const room=rooms[data.room]
 
 if(room.players.length<2){
-ws.send(JSON.stringify({type:"error"}))
 return
 }
 
@@ -102,11 +95,7 @@ if(data.type==="dice"){
 
 const room=rooms[ws.room]
 
-const player = room.players.find(p=>p.name===ws.name)
-
-if(room.players[room.turn].name!==player.name){
-return
-}
+const player=room.players.find(p=>p.name===ws.name)
 
 player.pos=data.pos
 player.hype=data.hype
@@ -130,21 +119,7 @@ type:"turn",
 player:room.players[room.turn].name
 })
 
-sendPlayers(ws.room)
-
 }
-
-})
-
-ws.on("close",()=>{
-
-const room=rooms[ws.room]
-
-if(!room) return
-
-room.players = room.players.filter(p=>p.name!==ws.name)
-
-sendPlayers(ws.room)
 
 })
 
