@@ -5,32 +5,24 @@
 <title>LitmHype</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
 <div id="game">
-
-<div id="boardWrap">
-
-<img src="board.jpg" id="board">
-
-<div id="playersBoard"></div>
-
+  <div id="boardWrap">
+    <img src="board.jpg" id="board">
+    <div id="playersBoard"></div>
+  </div>
+  <div id="ui">
+    <div id="turn"></div>
+    <div id="score"></div>
+    <button id="dice">🎲 Бросить кубик</button>
+  </div>
 </div>
 
-<div id="ui">
-
-<div id="turn"></div>
-
-<div id="score"></div>
-
-<button id="dice">🎲 Бросить кубик</button>
-
-</div>
-
+<div id="scandalPopup" class="popup">
+  <div id="scandalText"></div>
+  <button onclick="closeScandal()">OK</button>
 </div>
 
 <script src="game.js"></script>
-
 </body>
 </html>
