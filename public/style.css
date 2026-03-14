@@ -1,95 +1,20 @@
-body{
-background:#0b0b0b;
-color:white;
-font-family:Arial;
-text-align:center;
-margin:0;
-overflow-x:hidden;
-}
-
-#game{
-display:flex;
-flex-direction:column;
-align-items:center;
-}
-
-#boardWrap{
-position:relative;
-width:95vw;
-max-width:1024px;
-}
-
-#board{
-width:100%;
-border-radius:10px;
-box-shadow:0 0 40px cyan;
-}
-
-.player{
-width:28px;
-height:28px;
-border-radius:50%;
-position:absolute;
-border:3px solid white;
-transform:translate(-50%,-50%);
-transition:0.35s;
-}
-
-#ui{
-margin-top:15px;
-width:90%;
-max-width:400px;
-}
-
-#turn{
-font-size:20px;
-margin-bottom:10px;
-}
-
-#score{
-margin-bottom:15px;
-}
-
-#score div{
-margin:5px 0;
-}
-
-#dice{
-width:100%;
-height:60px;
-font-size:22px;
-border:none;
-border-radius:10px;
-background:white;
-color:black;
-box-shadow:0 0 20px cyan;
-cursor:pointer;
-}
-
-#dice:hover{
-box-shadow:0 0 35px cyan;
-}
-
-#colors{
-display:flex;
-justify-content:center;
-gap:15px;
-margin:10px 0;
-}
-
-.color{
-width:40px;
-height:40px;
-border-radius:50%;
-cursor:pointer;
-border:3px solid white;
-}
-
-.color[data-color="yellow"]{background:yellow}
-.color[data-color="red"]{background:red}
-.color[data-color="blue"]{background:blue}
-.color[data-color="purple"]{background:purple}
-
-.selected{
-box-shadow:0 0 15px white;
-}
+body{background:#0b0b0b;color:white;font-family:Arial;text-align:center;margin:0;overflow-x:hidden;}
+#game{display:flex;flex-direction:column;align-items:center;}
+#boardWrap{position:relative;width:95vw;max-width:1024px;}
+#board{width:100%;border-radius:10px;box-shadow:0 0 40px cyan;}
+.player{width:28px;height:28px;border-radius:50%;position:absolute;border:3px solid white;transform:translate(-50%,-50%);transition:0.35s;}
+#ui{margin-top:15px;width:90%;max-width:400px;}
+#turn{font-size:20px;margin-bottom:10px;}
+#score{margin-bottom:15px;}
+#score div{margin:5px 0;}
+#dice{width:100%;height:60px;font-size:22px;border:none;border-radius:10px;background:white;color:black;box-shadow:0 0 20px cyan;cursor:pointer;}
+#dice:hover{box-shadow:0 0 35px cyan;}
+#colors{display:flex;justify-content:center;gap:15px;margin:10px 0;}
+.color{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid white;}
+.color[data-color="yellow"]{background:yellow;}
+.color[data-color="red"]{background:red;}
+.color[data-color="blue"]{background:blue;}
+.color[data-color="purple"]{background:purple;}
+.selected{box-shadow:0 0 15px white;}
+.popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;padding:20px;border:3px solid cyan;border-radius:10px;z-index:100;text-align:center;}
+.popup button{margin-top:10px;padding:5px 15px;background:cyan;border:none;border-radius:5px;color:black;font-weight:bold;cursor:pointer;}
