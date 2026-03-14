@@ -1,120 +1,64 @@
 body{
-background:black;
+background:#0b0b0b;
 color:white;
-font-family:sans-serif;
+font-family:Arial;
 text-align:center;
+margin:0;
 }
 
-.lobby{
-width:300px;
-margin:auto;
-margin-top:100px;
-}
+/* лобби */
 
 input{
-width:250px;
-padding:10px;
-margin:5px;
+padding:12px;
+margin:10px;
 font-size:18px;
+border-radius:8px;
+border:none;
 }
 
 button{
-padding:10px 20px;
+padding:12px 20px;
 font-size:18px;
-margin:10px;
+border-radius:10px;
+border:none;
 cursor:pointer;
+background:#00eaff;
+color:black;
+box-shadow:0 0 15px #00eaff;
 }
 
-.colors{
+button:hover{
+box-shadow:0 0 25px #00eaff;
+}
+
+/* выбор фишек */
+
+#colors{
 display:flex;
 justify-content:center;
-margin:10px;
+gap:20px;
+margin:20px;
 }
 
 .color{
-width:30px;
-height:30px;
+width:40px;
+height:40px;
 border-radius:50%;
-margin:5px;
 cursor:pointer;
-}
-
-#boardWrap{
-position:relative;
-width:1024px;
-margin:auto;
-}
-
-#board{
-width:1024px;
-}
-
-.player{
-width:30px;
-height:30px;
-border-radius:50%;
-position:absolute;
-transition:0.4s;
 border:3px solid white;
 }
 
-#panel{
-margin-top:20px;
+.color[data-color="yellow"]{background:yellow}
+.color[data-color="red"]{background:red}
+.color[data-color="blue"]{background:blue}
+.color[data-color="purple"]{background:purple}
+
+.selected{
+box-shadow:0 0 15px white;
+transform:scale(1.2);
 }
 
-#gameUI{
-display:flex;
-justify-content:center;
-align-items:flex-start;
-gap:40px;
-margin-top:20px;
-}
-
-#sidePanel{
-width:220px;
-}
-
-#diceBox{
-margin-top:20px;
-margin-bottom:20px;
-}
-
-#dice{
-width:80px;
-height:80px;
-background:white;
-color:black;
-font-size:40px;
-display:flex;
-justify-content:center;
-align-items:center;
-border-radius:10px;
-cursor:pointer;
-box-shadow:0 0 20px cyan;
-}
-
-#card{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:black;
-color:white;
-padding:30px;
-font-size:20px;
-border-radius:10px;
-display:none;
-box-shadow:0 0 30px red;
-}
-
-#turn{
-font-size:20px;
-margin-bottom:10px;
-}
-
-#score div{
-margin:5px 0;
-}
+/* игровое поле */
 
 #game{
 display:flex;
@@ -130,7 +74,11 @@ width:1024px;
 
 #board{
 width:1024px;
+border-radius:10px;
+box-shadow:0 0 40px cyan;
 }
+
+/* фишки */
 
 .player{
 width:32px;
@@ -141,30 +89,38 @@ border:3px solid white;
 transition:0.4s;
 }
 
+/* панель */
+
 #ui{
 width:220px;
+text-align:left;
 }
 
+#turn{
+font-size:20px;
+margin-bottom:15px;
+}
+
+#score{
+margin-bottom:20px;
+}
+
+#score div{
+margin:6px 0;
+}
+
+/* кубик */
+
 #dice{
-margin-top:20px;
 width:200px;
 height:60px;
 font-size:22px;
-cursor:pointer;
 background:white;
+color:black;
 border-radius:10px;
 box-shadow:0 0 20px cyan;
 }
 
-#card{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:black;
-color:white;
-padding:30px;
-border-radius:10px;
-display:none;
-box-shadow:0 0 25px red;
+#dice:hover{
+box-shadow:0 0 30px cyan;
 }
