@@ -10,7 +10,6 @@ const dice=document.getElementById("dice")
 let players={}
 let myTurn=false
 
-// координаты клеток
 const cells=[
 {x:103,y:600},
 {x:107,y:473},
@@ -34,26 +33,14 @@ const cells=[
 {x:213,y:615}
 ]
 
-// подключение к игре
-socket.onopen=()=>{
-
-socket.send(JSON.stringify({
-type:"join",
-name:name,
-room:room,
-color:color
-}))
-
-}
-
-// создать фишку
+// создаём фишку
 function createPlayer(p){
 
 const el=document.createElement("div")
 
 el.className="player"
-el.id="player_"+p.name
 el.style.background=p.color
+el.id="player_"+p.name
 
 board.appendChild(el)
 
@@ -67,10 +54,12 @@ movePlayer(p.name)
 
 }
 
-// перемещение
+// движение
 function movePlayer(playerName){
 
 const p=players[playerName]
+
+if(!p) return
 
 const c=cells[p.pos]
 
@@ -121,7 +110,7 @@ hype:players[name].hype
 
 }
 
-// сообщения сервера
+// сообщения
 socket.onmessage=e=>{
 
 const data=JSON.parse(e.data)
@@ -139,7 +128,7 @@ createPlayer(p)
 
 document.getElementById("score").innerHTML+=`
 <div style="color:${p.color}">
-${p.name}: ${p.hype} хайпа
+${p.name}: ${p.hype}
 </div>
 `
 
@@ -149,6 +138,10 @@ ${p.name}: ${p.hype} хайпа
 
 // движение
 if(data.type==="move"){
+
+if(!players[data.name]){
+createPlayer(data)
+}
 
 players[data.name].pos=data.pos
 players[data.name].hype=data.hype
