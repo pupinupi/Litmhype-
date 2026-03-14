@@ -4,76 +4,27 @@ color:white;
 font-family:Arial;
 text-align:center;
 margin:0;
+overflow-x:hidden;
 }
 
-/* лобби */
-
-input{
-padding:12px;
-margin:10px;
-font-size:18px;
-border-radius:8px;
-border:none;
-}
-
-button{
-padding:12px 20px;
-font-size:18px;
-border-radius:10px;
-border:none;
-cursor:pointer;
-background:#00eaff;
-color:black;
-box-shadow:0 0 15px #00eaff;
-}
-
-button:hover{
-box-shadow:0 0 25px #00eaff;
-}
-
-/* выбор фишек */
-
-#colors{
-display:flex;
-justify-content:center;
-gap:20px;
-margin:20px;
-}
-
-.color{
-width:40px;
-height:40px;
-border-radius:50%;
-cursor:pointer;
-border:3px solid white;
-}
-
-.color[data-color="yellow"]{background:yellow}
-.color[data-color="red"]{background:red}
-.color[data-color="blue"]{background:blue}
-.color[data-color="purple"]{background:purple}
-
-.selected{
-box-shadow:0 0 15px white;
-transform:scale(1.2);
-}
-
-/* игровое поле */
+/* контейнер игры */
 
 #game{
 display:flex;
-justify-content:center;
-gap:30px;
-margin-top:20px;
+flex-direction:column;
+align-items:center;
 }
+
+/* поле */
 
 #boardWrap{
 position:relative;
-width:1024px;
+width:95vw;
+max-width:1024px;
 }
 
 #board{
-width:1024px;
+width:100%;
 border-radius:10px;
 box-shadow:0 0 40px cyan;
 }
@@ -81,46 +32,54 @@ box-shadow:0 0 40px cyan;
 /* фишки */
 
 .player{
-width:32px;
-height:32px;
+width:28px;
+height:28px;
 border-radius:50%;
 position:absolute;
 border:3px solid white;
-transition:0.4s;
+transform:translate(-50%,-50%);
+transition:0.35s;
 }
 
 /* панель */
 
 #ui{
-width:220px;
-text-align:left;
+margin-top:15px;
+width:90%;
+max-width:400px;
 }
+
+/* очередь */
 
 #turn{
 font-size:20px;
+margin-bottom:10px;
+}
+
+/* счет */
+
+#score{
 margin-bottom:15px;
 }
 
-#score{
-margin-bottom:20px;
-}
-
 #score div{
-margin:6px 0;
+margin:5px 0;
 }
 
 /* кубик */
 
 #dice{
-width:200px;
+width:100%;
 height:60px;
 font-size:22px;
+border:none;
+border-radius:10px;
 background:white;
 color:black;
-border-radius:10px;
 box-shadow:0 0 20px cyan;
+cursor:pointer;
 }
 
 #dice:hover{
-box-shadow:0 0 30px cyan;
+box-shadow:0 0 35px cyan;
 }
