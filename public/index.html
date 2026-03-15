@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Лобби</title>
+<title>Lobby</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -12,7 +12,7 @@
 
 <input id="username" placeholder="Имя">
 
-<input id="roomCode" placeholder="Код комнаты">
+<input id="room" placeholder="Комната">
 
 <select id="color">
 <option value="red">Красный</option>
@@ -24,7 +24,6 @@
 <button id="join">Войти</button>
 
 <h2>Игроки</h2>
-
 <ul id="players"></ul>
 
 <button id="start">Начать игру</button>
@@ -39,31 +38,27 @@ let roomCode
 
 document.getElementById("join").onclick=()=>{
 
-const username = document.getElementById("username").value
-roomCode = document.getElementById("roomCode").value
-const color = document.getElementById("color").value
+const username=document.getElementById("username").value
+roomCode=document.getElementById("room").value
+const color=document.getElementById("color").value
 
 localStorage.setItem("room",roomCode)
 
-socket.emit("joinRoom",{
-username:username,
-roomCode:roomCode,
-color:color
-})
+socket.emit("joinRoom",{username,roomCode,color})
 
 }
 
-socket.on("updatePlayers",(players)=>{
+socket.on("playersUpdate",(players)=>{
 
-const list = document.getElementById("players")
+const list=document.getElementById("players")
 
 list.innerHTML=""
 
 players.forEach(p=>{
 
-const li = document.createElement("li")
+const li=document.createElement("li")
 
-li.innerText = p.username + " ("+p.color+")"
+li.innerText=p.username+" ("+p.color+")"
 
 list.appendChild(li)
 
@@ -73,13 +68,14 @@ list.appendChild(li)
 
 document.getElementById("start").onclick=()=>{
 
-socket.emit("startGame",{roomCode:roomCode})
+socket.emit("startGame",roomCode)
 
 }
 
-socket.on("gameStarted",(data)=>{
+socket.on("gameStart",(data)=>{
 
 localStorage.setItem("players",JSON.stringify(data.players))
+localStorage.setItem("positions",JSON.stringify(data.positions))
 
 window.location.href="game.html"
 
