@@ -14,7 +14,9 @@ io.on("connection",(socket)=>{
 
 console.log("player connected",socket.id)
 
-socket.on("joinRoom",({username,roomCode,color})=>{
+socket.on("joinRoom",(data)=>{
+
+const {username,roomCode,color} = data
 
 if(!rooms[roomCode]){
 rooms[roomCode]={
@@ -26,49 +28,55 @@ turn:0
 
 const room = rooms[roomCode]
 
+if(room.players.length >= 4) return
+
 room.players.push({
 id:socket.id,
-username:username,
-color:color
+username,
+color
 })
 
-room.positions[socket.id]=0
+room.positions[socket.id] = 0
 
 socket.join(roomCode)
 
-io.to(roomCode).emit("updatePlayers",room.players)
+io.to(roomCode).emit("playersUpdate",room.players)
 
 })
 
-socket.on("startGame",({roomCode})=>{
-
-const room = rooms[roomCode]
-
-io.to(roomCode).emit("gameStarted",{
-players:room.players
-})
-
-})
-
-socket.on("rollDice",({roomCode})=>{
+socket.on("startGame",(roomCode)=>{
 
 const room = rooms[roomCode]
 
 if(!room) return
 
-const currentPlayer = room.players[room.turn]
+io.to(roomCode).emit("gameStart",{
+players:room.players,
+positions:room.positions,
+turn:room.turn
+})
 
-if(currentPlayer.id !== socket.id) return
+})
+
+socket.on("rollDice",(roomCode)=>{
+
+const room = rooms[roomCode]
+
+if(!room) return
+
+const player = room.players[room.turn]
+
+if(player.id !== socket.id) return
 
 const roll = Math.floor(Math.random()*6)+1
 
 room.positions[socket.id]+=roll
 
 if(room.positions[socket.id] >= 20){
-room.positions[socket.id]-=20
+room.positions[socket.id] -= 20
 }
 
-io.to(roomCode).emit("diceRolled",{
+io.to(roomCode).emit("diceResult",{
 playerId:socket.id,
 roll:roll,
 position:room.positions[socket.id]
@@ -80,19 +88,21 @@ if(room.turn >= room.players.length){
 room.turn = 0
 }
 
+io.to(roomCode).emit("turnUpdate",room.turn)
+
 })
 
 socket.on("disconnect",()=>{
 
-for(let roomCode in rooms){
+for(let code in rooms){
 
-let room = rooms[roomCode]
+let room = rooms[code]
 
 room.players = room.players.filter(p=>p.id!==socket.id)
 
 delete room.positions[socket.id]
 
-io.to(roomCode).emit("updatePlayers",room.players)
+io.to(code).emit("playersUpdate",room.players)
 
 }
 
@@ -100,6 +110,6 @@ io.to(roomCode).emit("updatePlayers",room.players)
 
 })
 
-server.listen(3000,()=>{
-console.log("server running on http://localhost:3000")
+server.listen(3000,"0.0.0.0",()=>{
+console.log("server running")
 })
