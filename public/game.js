@@ -1,9 +1,6 @@
 const socket = io()
 
 const board = document.getElementById("board-container")
-
-const players = JSON.parse(localStorage.getItem("players"))
-
 const roomCode = localStorage.getItem("room")
 
 let tokens = {}
@@ -36,40 +33,48 @@ const cells = [
 
 ]
 
+socket.emit("requestGameState",roomCode)
+
+socket.on("gameState",(data)=>{
+
+const players=data.players
+const positions=data.positions
+
 players.forEach(player=>{
 
-const token = document.createElement("div")
+const token=document.createElement("div")
 
 token.className="token"
-
 token.style.background=player.color
 
 board.appendChild(token)
 
 tokens[player.id]=token
 
-moveToken(player.id,0)
+moveToken(player.id,positions[player.id])
+
+})
 
 })
 
 function moveToken(id,pos){
 
-const cell = cells[pos]
+const cell=cells[pos]
 
-const token = tokens[id]
+const token=tokens[id]
 
-token.style.left = (cell.x/1024*100)+"%"
-token.style.top = (cell.y/1024*100)+"%"
+token.style.left=(cell.x/1024*100)+"%"
+token.style.top=(cell.y/1024*100)+"%"
 
 }
 
 document.getElementById("dice").onclick=()=>{
 
-socket.emit("rollDice",{roomCode})
+socket.emit("rollDice",roomCode)
 
 }
 
-socket.on("diceRolled",(data)=>{
+socket.on("diceResult",(data)=>{
 
 alert("Выпало "+data.roll)
 
