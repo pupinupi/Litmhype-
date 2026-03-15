@@ -14,6 +14,8 @@ io.on("connection", (socket) => {
 
   socket.on("joinRoom", ({ username, roomCode, color }) => {
 
+    socket.roomCode = roomCode;
+
     if (!rooms[roomCode]) {
       rooms[roomCode] = {
         players: [],
@@ -24,19 +26,20 @@ io.on("connection", (socket) => {
 
     const room = rooms[roomCode];
 
+    if (room.players.find(p => p.id === socket.id)) return;
     if (room.players.length >= 4) return;
 
-    room.players.push({
-      id: socket.id,
-      username,
-      color
-    });
-
+    room.players.push({ id: socket.id, username, color });
     room.positions[socket.id] = 0;
 
     socket.join(roomCode);
 
+    // Отправляем **всем игрокам обновлённый список игроков**
     io.to(roomCode).emit("playersUpdate", room.players);
+
+    // Новому игроку отправляем **текущее состояние игры**
+    socket.emit("state", { players: room.players, positions: room.positions, turn: room.turn });
+
   });
 
   socket.on("startGame", (roomCode) => {
@@ -46,41 +49,44 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("startGame");
   });
 
-  socket.on("getState", (roomCode) => {
-    const room = rooms[roomCode];
-    if (!room) return;
-
-    socket.emit("state", {
-      players: room.players,
-      positions: room.positions,
-      turn: room.turn
-    });
-  });
-
   socket.on("rollDice", (roomCode) => {
     const room = rooms[roomCode];
     if (!room) return;
 
     const currentPlayer = room.players[room.turn];
-    if (!currentPlayer) return;
+    if (!currentPlayer || currentPlayer.id !== socket.id) return;
 
     const roll = Math.floor(Math.random() * 6) + 1;
 
     room.positions[currentPlayer.id] += roll;
-    if (room.positions[currentPlayer.id] > 19) {
-      room.positions[currentPlayer.id] = 19;
-    }
+    if (room.positions[currentPlayer.id] > 19) room.positions[currentPlayer.id] = 19;
 
     io.to(roomCode).emit("diceResult", {
       playerId: currentPlayer.id,
       roll,
-      position: room.positions[currentPlayer.id]
+      positions: { ...room.positions }
     });
 
+    // Переключаем очередь
     room.turn++;
     if (room.turn >= room.players.length) room.turn = 0;
+
+    io.to(roomCode).emit("turnUpdate", room.turn);
+  });
+
+  socket.on("disconnect", () => {
+    const roomCode = socket.roomCode;
+    if (!roomCode) return;
+
+    const room = rooms[roomCode];
+    if (!room) return;
+
+    room.players = room.players.filter(p => p.id !== socket.id);
+    delete room.positions[socket.id];
+
+    io.to(roomCode).emit("playersUpdate", room.players);
   });
 
 });
-server.listen(3000, "0.0.0.0");
 
+server.listen(3000, () => console.log("Server running on port 3000"));
