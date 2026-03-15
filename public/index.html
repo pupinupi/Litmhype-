@@ -75,7 +75,13 @@ socket.on('colorTaken', ()=>alert('Эта фишка уже выбрана!'));
 document.getElementById('startBtn').addEventListener('click', ()=>{
     socket.emit('startGame',{roomCode});
 });
-socket.on('gameStarted', ()=>window.location.href='game.html');
+socket.on('gameStarted', (data)=>{
+
+localStorage.setItem("players", JSON.stringify(data.players))
+
+window.location.href='game.html'
+
+})
 </script>
 </body>
 </html>
