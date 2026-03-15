@@ -12,11 +12,13 @@ let rooms = {}
 
 io.on("connection",(socket)=>{
 
-console.log("player connected",socket.id)
+console.log("connected",socket.id)
 
 socket.on("joinRoom",(data)=>{
 
 const {username,roomCode,color} = data
+
+socket.roomCode = roomCode
 
 if(!rooms[roomCode]){
 rooms[roomCode]={
@@ -36,7 +38,7 @@ username,
 color
 })
 
-room.positions[socket.id] = 0
+room.positions[socket.id]=0
 
 socket.join(roomCode)
 
@@ -48,9 +50,17 @@ socket.on("startGame",(roomCode)=>{
 
 const room = rooms[roomCode]
 
+io.to(roomCode).emit("gameStart")
+
+})
+
+socket.on("requestGameState",(roomCode)=>{
+
+const room = rooms[roomCode]
+
 if(!room) return
 
-io.to(roomCode).emit("gameStart",{
+socket.emit("gameState",{
 players:room.players,
 positions:room.positions,
 turn:room.turn
@@ -72,8 +82,8 @@ const roll = Math.floor(Math.random()*6)+1
 
 room.positions[socket.id]+=roll
 
-if(room.positions[socket.id] >= 20){
-room.positions[socket.id] -= 20
+if(room.positions[socket.id]>=20){
+room.positions[socket.id]-=20
 }
 
 io.to(roomCode).emit("diceResult",{
@@ -84,32 +94,32 @@ position:room.positions[socket.id]
 
 room.turn++
 
-if(room.turn >= room.players.length){
-room.turn = 0
+if(room.turn>=room.players.length){
+room.turn=0
 }
-
-io.to(roomCode).emit("turnUpdate",room.turn)
 
 })
 
 socket.on("disconnect",()=>{
 
-for(let code in rooms){
+const roomCode = socket.roomCode
 
-let room = rooms[code]
+if(!roomCode) return
+
+const room = rooms[roomCode]
+
+if(!room) return
 
 room.players = room.players.filter(p=>p.id!==socket.id)
 
 delete room.positions[socket.id]
 
-io.to(code).emit("playersUpdate",room.players)
-
-}
+io.to(roomCode).emit("playersUpdate",room.players)
 
 })
 
 })
 
 server.listen(3000,"0.0.0.0",()=>{
-console.log("server running")
+console.log("server started")
 })
