@@ -30,13 +30,17 @@
 <script>
 const socket = io();
 let roomCode;
+let username;
+let color;
 
 document.getElementById("join").onclick = () => {
-  const username = document.getElementById("username").value;
+  username = document.getElementById("username").value;
   roomCode = document.getElementById("room").value;
-  const color = document.getElementById("color").value;
+  color = document.getElementById("color").value;
 
   localStorage.setItem("room", roomCode);
+  localStorage.setItem("username", username);
+  localStorage.setItem("color", color);
 
   socket.emit("joinRoom", { username, roomCode, color });
 };
@@ -62,4 +66,3 @@ socket.on("startGame", () => {
 
 </body>
 </html>
-
