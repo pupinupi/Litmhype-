@@ -45,18 +45,30 @@ document.getElementById('joinBtn').addEventListener('click', ()=>{
 });
 
 socket.on('updatePlayers', (players)=>{
-    const ul = document.getElementById('playersList');
-    ul.innerHTML = '';
-    players.forEach((p,i)=>{
-        const li = document.createElement('li');
-        li.textContent = p.username+' ('+p.color+')';
-        ul.appendChild(li);
-    });
-    if(players.length>0 && players[0].id===socket.id) {
-        isCreator = true;
-        document.getElementById('startBtn').style.display='block';
-    }
-});
+
+const ul = document.getElementById('playersList')
+ul.innerHTML = ''
+
+players.forEach((p,i)=>{
+const li = document.createElement('li')
+li.textContent = p.username + " (" + p.color + ")"
+ul.appendChild(li)
+})
+
+/* первый игрок = создатель комнаты */
+
+if(players.length > 0 && players[0].id === socket.id){
+
+document.getElementById('startBtn').style.display = 'block'
+
+}else{
+
+document.getElementById('startBtn').style.display = 'none'
+
+}
+
+})
+
 
 socket.on('colorTaken', ()=>alert('Эта фишка уже выбрана!'));
 
