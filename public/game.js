@@ -1,5 +1,7 @@
 const socket = io();
 const roomCode = localStorage.getItem("room");
+const username = localStorage.getItem("username");
+const color = localStorage.getItem("color");
 
 const board = document.getElementById("board-container");
 let tokens = {};
@@ -26,37 +28,35 @@ function createToken(playerId, color){
 // Двигаем фишку
 function moveToken(playerId, pos){
   const token = tokens[playerId];
-  const cell = cells[pos];
-  if(!cell) return;
+  const cell = cells[pos] || cells[0];
   token.style.transition = "all 0.5s linear";
-  token.style.left = (cell.x/1024*100) + "%";
-  token.style.top = (cell.y/1024*100) + "%";
+  token.style.left = (cell.x/1024*100)+"%";
+  token.style.top = (cell.y/1024*100)+"%";
 }
 
-// Получаем состояние игры
+// Отправляем серверу данные текущего игрока
+socket.emit("joinRoom", { username, roomCode, color });
+
+// Получаем состояние всех игроков
 socket.on("state", (data) => {
   players = data.players;
   positions = data.positions;
   players.forEach(p => {
     createToken(p.id, p.color);
+    moveToken(p.id, positions[p.id] || 0);
+  });
+});
+
+// Обновление игроков при подключении/отключении
+socket.on("playersUpdate", (list) => {
+  list.forEach(p => {
+    createToken(p.id, p.color);
+    if(positions[p.id] === undefined) positions[p.id] = 0;
     moveToken(p.id, positions[p.id]);
   });
 });
 
-// Обновление игроков (новый игрок зашёл)
-socket.on("playersUpdate", (list) => {
-  list.forEach(p => {
-    createToken(p.id, p.color);
-    if(positions[p.id] !== undefined){
-      moveToken(p.id, positions[p.id]);
-    } else {
-      positions[p.id] = 0;
-      moveToken(p.id, 0);
-    }
-  });
-});
-
-// Клик кубика
+// Бросок кубика
 document.getElementById("dice").onclick = () => {
   socket.emit("rollDice", roomCode);
 };
@@ -67,7 +67,3 @@ socket.on("diceResult", (data) => {
   moveToken(data.playerId, data.position);
   alert(`Выпало ${data.roll}`);
 });
-
-// При загрузке страницы запрашиваем состояние
-socket.emit("joinRoom", { username: localStorage.getItem("username") || "Игрок", roomCode, color: "red" });
-socket.emit("getState", roomCode);
