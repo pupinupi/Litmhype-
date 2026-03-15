@@ -30,8 +30,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('startGame', ({roomCode})=>{
-        io.to(roomCode).emit('gameStarted');
-    });
+
+const room = rooms[roomCode]
+
+io.to(roomCode).emit('gameStarted', {
+players: room.players
+})
+
+})
 
     socket.on('rollDice', ({roomCode})=>{
         const room = rooms[roomCode];
