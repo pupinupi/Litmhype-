@@ -1,65 +1,77 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+const express = require("express")
+const http = require("http")
+const { Server } = require("socket.io")
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const app = express()
+const server = http.createServer(app)
+const io = new Server(server)
 
-// отдаём статику
-app.use(express.static('public'));
+app.use(express.static("public"))
 
-// структура комнат
-let rooms = {}; // roomCode: {players:[], turn:0, positions:{}, hype:{}}
+let rooms = {}
 
-io.on('connection', (socket) => {
-    console.log('Новое подключение:', socket.id);
+io.on("connection",(socket)=>{
 
-    socket.on('joinRoom', ({username, roomCode, color}) => {
-        socket.join(roomCode);
-        if(!rooms[roomCode]) rooms[roomCode] = {players: [], turn:0, positions:{}, hype:{}};
-        if(rooms[roomCode].players.find(p=>p.color===color)){
-            socket.emit('colorTaken');
-            return;
-        }
-        rooms[roomCode].players.push({id: socket.id, username, color});
-        rooms[roomCode].positions[socket.id]=0;
-        rooms[roomCode].hype[socket.id]=0;
+console.log("player connected",socket.id)
 
-        io.to(roomCode).emit('updatePlayers', rooms[roomCode].players);
-    });
+socket.on("joinRoom",({username,roomCode,color})=>{
 
-    socket.on('startGame', ({roomCode})=>{
+if(!rooms[roomCode]){
+rooms[roomCode]={
+players:[],
+positions:{},
+turn:0
+}
+}
 
 const room = rooms[roomCode]
 
-io.to(roomCode).emit('gameStarted', {
-players: room.players
+room.players.push({
+id:socket.id,
+username:username,
+color:color
+})
+
+room.positions[socket.id]=0
+
+socket.join(roomCode)
+
+io.to(roomCode).emit("updatePlayers",room.players)
+
+})
+
+socket.on("startGame",({roomCode})=>{
+
+const room = rooms[roomCode]
+
+io.to(roomCode).emit("gameStarted",{
+players:room.players
 })
 
 })
 
-    socket.on('rollDice', ({roomCode})=>{
+socket.on("rollDice",({roomCode})=>{
 
 const room = rooms[roomCode]
 
 if(!room) return
 
-const player = room.players[room.turn]
+const currentPlayer = room.players[room.turn]
 
-if(player.id !== socket.id) return
+if(currentPlayer.id !== socket.id) return
 
 const roll = Math.floor(Math.random()*6)+1
 
-room.positions[player.id] += roll
+room.positions[socket.id]+=roll
 
-if(room.positions[player.id] >= 20){
-room.positions[player.id] -= 20
+if(room.positions[socket.id] >= 20){
+room.positions[socket.id]-=20
 }
 
-io.to(roomCode).emit('diceRolled',{
+io.to(roomCode).emit("diceRolled",{
+playerId:socket.id,
 roll:roll,
-playerId:player.id
+position:room.positions[socket.id]
 })
 
 room.turn++
@@ -69,26 +81,25 @@ room.turn = 0
 }
 
 })
-        room.turn = (room.turn+1)%room.players.length;
-        io.to(roomCode).emit('nextTurn', room.turn);
-    });
 
-    socket.on('updateHype', ({roomCode, playerId, newHype})=>{
-        const room = rooms[roomCode];
-        if(!room) return;
-        room.hype[playerId] = newHype;
-        io.to(roomCode).emit('updateHype', {playerId, newHype});
-    });
+socket.on("disconnect",()=>{
 
-    socket.on('disconnect', ()=>{
-        for(let roomCode in rooms){
-            let room = rooms[roomCode];
-            room.players = room.players.filter(p=>p.id!==socket.id);
-            delete room.positions[socket.id];
-            delete room.hype[socket.id];
-            io.to(roomCode).emit('updatePlayers', room.players);
-        }
-    });
-});
+for(let roomCode in rooms){
 
-server.listen(3000, ()=>console.log('Сервер запущен на http://localhost:3000'));
+let room = rooms[roomCode]
+
+room.players = room.players.filter(p=>p.id!==socket.id)
+
+delete room.positions[socket.id]
+
+io.to(roomCode).emit("updatePlayers",room.players)
+
+}
+
+})
+
+})
+
+server.listen(3000,()=>{
+console.log("server running on http://localhost:3000")
+})
