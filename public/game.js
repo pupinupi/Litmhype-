@@ -1,4 +1,5 @@
-const socket = io()
+players = JSON.parse(localStorage.getItem("players")) || []
+  const socket = io()
 
 const username = localStorage.getItem("username")
 const roomCode = localStorage.getItem("room")
@@ -8,7 +9,8 @@ const board = document.getElementById("board-container")
 const diceBtn = document.getElementById("diceBtn")
 const popup = document.getElementById("popup")
 const hypeBoard = document.getElementById("hype-board")
-
+players.forEach(createToken)
+showRules()
 let players = []
 let tokens = {}
 let hype = {}
