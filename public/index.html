@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>Lobby</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h2>Лобби</h2>
+<h1>Литвин: путь к хайпу</h1>
 
-<input id="name" placeholder="Имя">
-<input id="room" placeholder="Комната">
+<input id="username" placeholder="Имя">
+<input id="room" placeholder="Код комнаты">
 
 <select id="color">
 <option value="red">Красный</option>
@@ -21,40 +21,34 @@
 
 <button id="join">Войти</button>
 
+<h2>Игроки в комнате</h2>
 <ul id="players"></ul>
 
 <button id="start">Начать игру</button>
 
 <script src="/socket.io/socket.io.js"></script>
-
 <script>
-
 const socket = io();
 let roomCode;
 
 document.getElementById("join").onclick = () => {
-
-  const username = document.getElementById("name").value;
+  const username = document.getElementById("username").value;
   roomCode = document.getElementById("room").value;
   const color = document.getElementById("color").value;
 
   localStorage.setItem("room", roomCode);
 
   socket.emit("joinRoom", { username, roomCode, color });
-
 };
 
 socket.on("playersUpdate", (players) => {
-
   const list = document.getElementById("players");
   list.innerHTML = "";
-
   players.forEach(p => {
     const li = document.createElement("li");
-    li.innerText = p.username + " (" + p.color + ")";
+    li.innerText = `${p.username} (${p.color})`;
     list.appendChild(li);
   });
-
 });
 
 document.getElementById("start").onclick = () => {
@@ -64,8 +58,8 @@ document.getElementById("start").onclick = () => {
 socket.on("startGame", () => {
   window.location.href = "game.html";
 });
-
 </script>
 
 </body>
 </html>
+
