@@ -11,7 +11,6 @@
 <h1>Литвин: путь к хайпу</h1>
 
 <input id="username" placeholder="Имя">
-
 <input id="room" placeholder="Комната">
 
 <select id="color">
@@ -33,7 +32,6 @@
 <script>
 
 const socket = io()
-
 let roomCode
 
 document.getElementById("join").onclick=()=>{
@@ -57,7 +55,6 @@ list.innerHTML=""
 players.forEach(p=>{
 
 const li=document.createElement("li")
-
 li.innerText=p.username+" ("+p.color+")"
 
 list.appendChild(li)
@@ -72,10 +69,7 @@ socket.emit("startGame",roomCode)
 
 }
 
-socket.on("gameStart",(data)=>{
-
-localStorage.setItem("players",JSON.stringify(data.players))
-localStorage.setItem("positions",JSON.stringify(data.positions))
+socket.on("gameStart",()=>{
 
 window.location.href="game.html"
 
