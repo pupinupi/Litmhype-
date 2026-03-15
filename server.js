@@ -12,43 +12,38 @@ let rooms = {};
 
 io.on("connection", (socket) => {
 
+  // Игрок заходит в комнату
   socket.on("joinRoom", ({ username, roomCode, color }) => {
-
     socket.roomCode = roomCode;
 
     if (!rooms[roomCode]) {
-      rooms[roomCode] = {
-        players: [],
-        positions: {},
-        turn: 0
-      };
+      rooms[roomCode] = { players: [], positions: {}, turn: 0 };
     }
 
     const room = rooms[roomCode];
 
-    if (room.players.find(p => p.id === socket.id)) return;
-    if (room.players.length >= 4) return;
-
-    room.players.push({ id: socket.id, username, color });
-    room.positions[socket.id] = 0;
+    if (!room.players.find(p => p.id === socket.id)) {
+      room.players.push({ id: socket.id, username, color });
+      room.positions[socket.id] = 0;
+    }
 
     socket.join(roomCode);
 
-    // Отправляем **всем игрокам обновлённый список игроков**
+    // Всем игрокам отправляем список игроков
     io.to(roomCode).emit("playersUpdate", room.players);
 
-    // Новому игроку отправляем **текущее состояние игры**
+    // Новому игроку отправляем состояние игры
     socket.emit("state", { players: room.players, positions: room.positions, turn: room.turn });
-
   });
 
+  // Начало игры
   socket.on("startGame", (roomCode) => {
     const room = rooms[roomCode];
     if (!room) return;
-
     io.to(roomCode).emit("startGame");
   });
 
+  // Бросок кубика
   socket.on("rollDice", (roomCode) => {
     const room = rooms[roomCode];
     if (!room) return;
@@ -57,7 +52,6 @@ io.on("connection", (socket) => {
     if (!currentPlayer || currentPlayer.id !== socket.id) return;
 
     const roll = Math.floor(Math.random() * 6) + 1;
-
     room.positions[currentPlayer.id] += roll;
     if (room.positions[currentPlayer.id] > 19) room.positions[currentPlayer.id] = 19;
 
@@ -67,17 +61,16 @@ io.on("connection", (socket) => {
       positions: { ...room.positions }
     });
 
-    // Переключаем очередь
     room.turn++;
     if (room.turn >= room.players.length) room.turn = 0;
 
     io.to(roomCode).emit("turnUpdate", room.turn);
   });
 
+  // Игрок отключился
   socket.on("disconnect", () => {
     const roomCode = socket.roomCode;
     if (!roomCode) return;
-
     const room = rooms[roomCode];
     if (!room) return;
 
