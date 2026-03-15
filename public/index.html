@@ -1,87 +1,91 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Литвин. Путь к хайпу — Лобби</title>
+<title>Лобби</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<h1>Литвин. Путь к хайпу — Лобби</h1>
-<div>
-<input type="text" id="username" placeholder="Ваше имя">
-<input type="text" id="roomCode" placeholder="Код комнаты">
-<select id="tokenColor">
-    <option value="" disabled selected>Выберите цвет</option>
-    <option value="red">Красный</option>
-    <option value="yellow">Жёлтый</option>
-    <option value="blue">Синий</option>
-    <option value="purple">Фиолетовый</option>
+
+<h1>Литвин: путь к хайпу</h1>
+
+<input id="username" placeholder="Имя">
+
+<input id="roomCode" placeholder="Код комнаты">
+
+<select id="color">
+<option value="red">Красный</option>
+<option value="yellow">Жёлтый</option>
+<option value="blue">Синий</option>
+<option value="purple">Фиолетовый</option>
 </select>
-<button id="joinBtn">Войти</button>
-</div>
 
-<h3>Игроки в комнате:</h3>
-<ul id="playersList"></ul>
+<button id="join">Войти</button>
 
-<button id="startBtn" style="display:none;">Начать игру</button>
+<h2>Игроки</h2>
+
+<ul id="players"></ul>
+
+<button id="start">Начать игру</button>
 
 <script src="/socket.io/socket.io.js"></script>
+
 <script>
-const socket = io();
-let roomCode, username, color;
-let isCreator = false;
 
-document.getElementById('joinBtn').addEventListener('click', ()=>{
-    username = document.getElementById('username').value;
-    roomCode = document.getElementById('roomCode').value;
-    color = document.getElementById('tokenColor').value;
-    if(!username||!roomCode||!color){alert('Заполните все поля!');return;}
-    localStorage.setItem('username',username);
-    localStorage.setItem('room',roomCode);
-    localStorage.setItem('color',color);
+const socket = io()
 
-    socket.emit('joinRoom',{username, roomCode, color});
-});
+let roomCode
 
-socket.on('updatePlayers', (players)=>{
+document.getElementById("join").onclick=()=>{
 
-const ul = document.getElementById('playersList')
-ul.innerHTML = ''
+const username = document.getElementById("username").value
+roomCode = document.getElementById("roomCode").value
+const color = document.getElementById("color").value
 
-players.forEach((p,i)=>{
-const li = document.createElement('li')
-li.textContent = p.username + " (" + p.color + ")"
-ul.appendChild(li)
+localStorage.setItem("room",roomCode)
+
+socket.emit("joinRoom",{
+username:username,
+roomCode:roomCode,
+color:color
 })
-
-/* первый игрок = создатель комнаты */
-
-if(players.length > 0 && players[0].id === socket.id){
-
-document.getElementById('startBtn').style.display = 'block'
-
-}else{
-
-document.getElementById('startBtn').style.display = 'none'
 
 }
 
+socket.on("updatePlayers",(players)=>{
+
+const list = document.getElementById("players")
+
+list.innerHTML=""
+
+players.forEach(p=>{
+
+const li = document.createElement("li")
+
+li.innerText = p.username + " ("+p.color+")"
+
+list.appendChild(li)
+
 })
 
+})
 
-socket.on('colorTaken', ()=>alert('Эта фишка уже выбрана!'));
+document.getElementById("start").onclick=()=>{
 
-document.getElementById('startBtn').addEventListener('click', ()=>{
-    socket.emit('startGame',{roomCode});
-});
-socket.on('gameStarted', (data)=>{
+socket.emit("startGame",{roomCode:roomCode})
 
-localStorage.setItem("players", JSON.stringify(data.players))
+}
 
-window.location.href='game.html'
+socket.on("gameStarted",(data)=>{
+
+localStorage.setItem("players",JSON.stringify(data.players))
+
+window.location.href="game.html"
 
 })
+
 </script>
+
 </body>
 </html>
