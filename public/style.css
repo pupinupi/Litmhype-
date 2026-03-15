@@ -23,11 +23,18 @@ button:hover{background:#009acd;}
 
 #board-container{
     position:relative;
-    width:1024px;
-    height:1024px;
+    width:90vw;
+    max-width:1024px;
+    aspect-ratio:1/1;
     margin-top:20px;
     border:5px solid #00bfff;
     box-shadow:0 0 20px #00bfff;
+}
+
+#board{
+width:100%;
+height:100%;
+object-fit:contain;
 }
 
 #board{width:100%;height:100%;}
