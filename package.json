@@ -1,7 +1,7 @@
 {
-  "name": "litvin-hype-game",
+  "name": "litvin-game",
   "version": "1.0.0",
-  "description": "Онлайн игра Литвин. Путь к хайпу",
+  "description": "Litvin hype game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
