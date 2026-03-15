@@ -1,125 +1,86 @@
-const express = require("express")
-const http = require("http")
-const { Server } = require("socket.io")
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 
-const app = express()
-const server = http.createServer(app)
-const io = new Server(server)
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
-app.use(express.static("public"))
+app.use(express.static("public"));
 
-let rooms = {}
+let rooms = {};
 
-io.on("connection",(socket)=>{
+io.on("connection", (socket) => {
 
-console.log("connected",socket.id)
+  socket.on("joinRoom", ({ username, roomCode, color }) => {
 
-socket.on("joinRoom",(data)=>{
+    if (!rooms[roomCode]) {
+      rooms[roomCode] = {
+        players: [],
+        positions: {},
+        turn: 0
+      };
+    }
 
-const {username,roomCode,color} = data
+    const room = rooms[roomCode];
 
-socket.roomCode = roomCode
+    if (room.players.length >= 4) return;
 
-if(!rooms[roomCode]){
-rooms[roomCode]={
-players:[],
-positions:{},
-turn:0
-}
-}
+    room.players.push({
+      id: socket.id,
+      username,
+      color
+    });
 
-const room = rooms[roomCode]
+    room.positions[socket.id] = 0;
 
-if(room.players.length >= 4) return
+    socket.join(roomCode);
 
-room.players.push({
-id:socket.id,
-username,
-color
-})
+    io.to(roomCode).emit("playersUpdate", room.players);
+  });
 
-room.positions[socket.id]=0
+  socket.on("startGame", (roomCode) => {
+    const room = rooms[roomCode];
+    if (!room) return;
 
-socket.join(roomCode)
+    io.to(roomCode).emit("startGame");
+  });
 
-io.to(roomCode).emit("playersUpdate",room.players)
+  socket.on("getState", (roomCode) => {
+    const room = rooms[roomCode];
+    if (!room) return;
 
-})
+    socket.emit("state", {
+      players: room.players,
+      positions: room.positions,
+      turn: room.turn
+    });
+  });
 
-socket.on("startGame",(roomCode)=>{
+  socket.on("rollDice", (roomCode) => {
+    const room = rooms[roomCode];
+    if (!room) return;
 
-const room = rooms[roomCode]
+    const currentPlayer = room.players[room.turn];
+    if (!currentPlayer) return;
 
-io.to(roomCode).emit("gameStart")
+    const roll = Math.floor(Math.random() * 6) + 1;
 
-})
+    room.positions[currentPlayer.id] += roll;
+    if (room.positions[currentPlayer.id] > 19) {
+      room.positions[currentPlayer.id] = 19;
+    }
 
-socket.on("requestGameState",(roomCode)=>{
+    io.to(roomCode).emit("diceResult", {
+      playerId: currentPlayer.id,
+      roll,
+      position: room.positions[currentPlayer.id]
+    });
 
-const room = rooms[roomCode]
+    room.turn++;
+    if (room.turn >= room.players.length) room.turn = 0;
+  });
 
-if(!room) return
+});
+server.listen(3000, "0.0.0.0");
 
-socket.emit("gameState",{
-players:room.players,
-positions:room.positions,
-turn:room.turn
-})
-
-})
-
-socket.on("rollDice",(roomCode)=>{
-
-const room = rooms[roomCode]
-
-if(!room) return
-
-const player = room.players[room.turn]
-
-if(player.id !== socket.id) return
-
-const roll = Math.floor(Math.random()*6)+1
-
-room.positions[socket.id]+=roll
-
-if(room.positions[socket.id]>=20){
-room.positions[socket.id]-=20
-}
-
-io.to(roomCode).emit("diceResult",{
-playerId:socket.id,
-roll:roll,
-position:room.positions[socket.id]
-})
-
-room.turn++
-
-if(room.turn>=room.players.length){
-room.turn=0
-}
-
-})
-
-socket.on("disconnect",()=>{
-
-const roomCode = socket.roomCode
-
-if(!roomCode) return
-
-const room = rooms[roomCode]
-
-if(!room) return
-
-room.players = room.players.filter(p=>p.id!==socket.id)
-
-delete room.positions[socket.id]
-
-io.to(roomCode).emit("playersUpdate",room.players)
-
-})
-
-})
-
-server.listen(3000,"0.0.0.0",()=>{
-console.log("server started")
-})
