@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <title>Lobby</title>
-<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>Литвин: путь к хайпу</h1>
+<h2>Лобби</h2>
 
-<input id="username" placeholder="Имя">
+<input id="name" placeholder="Имя">
 <input id="room" placeholder="Комната">
 
 <select id="color">
@@ -22,7 +21,6 @@
 
 <button id="join">Войти</button>
 
-<h2>Игроки</h2>
 <ul id="players"></ul>
 
 <button id="start">Начать игру</button>
@@ -31,49 +29,41 @@
 
 <script>
 
-const socket = io()
-let roomCode
+const socket = io();
+let roomCode;
 
-document.getElementById("join").onclick=()=>{
+document.getElementById("join").onclick = () => {
 
-const username=document.getElementById("username").value
-roomCode=document.getElementById("room").value
-const color=document.getElementById("color").value
+  const username = document.getElementById("name").value;
+  roomCode = document.getElementById("room").value;
+  const color = document.getElementById("color").value;
 
-localStorage.setItem("room",roomCode)
+  localStorage.setItem("room", roomCode);
 
-socket.emit("joinRoom",{username,roomCode,color})
+  socket.emit("joinRoom", { username, roomCode, color });
 
-}
+};
 
-socket.on("playersUpdate",(players)=>{
+socket.on("playersUpdate", (players) => {
 
-const list=document.getElementById("players")
+  const list = document.getElementById("players");
+  list.innerHTML = "";
 
-list.innerHTML=""
+  players.forEach(p => {
+    const li = document.createElement("li");
+    li.innerText = p.username + " (" + p.color + ")";
+    list.appendChild(li);
+  });
 
-players.forEach(p=>{
+});
 
-const li=document.createElement("li")
-li.innerText=p.username+" ("+p.color+")"
+document.getElementById("start").onclick = () => {
+  socket.emit("startGame", roomCode);
+};
 
-list.appendChild(li)
-
-})
-
-})
-
-document.getElementById("start").onclick=()=>{
-
-socket.emit("startGame",roomCode)
-
-}
-
-socket.on("gameStart",()=>{
-
-window.location.href="game.html"
-
-})
+socket.on("startGame", () => {
+  window.location.href = "game.html";
+});
 
 </script>
 
