@@ -1,9 +1,10 @@
 const socket = io();
 const roomCode = localStorage.getItem("room");
 
-const board = document.getElementById("board");
-
+const board = document.getElementById("board-container");
 let tokens = {};
+let positions = {};
+let players = [];
 
 const cells = [
 {x:91,y:583},{x:91,y:442},{x:86,y:329},{x:86,y:218},{x:88,y:119},
@@ -12,42 +13,47 @@ const cells = [
 {x:776,y:588},{x:630,y:594},{x:494,y:586},{x:354,y:583},{x:215,y:586}
 ];
 
-socket.emit("getState", roomCode);
+function createToken(playerId, color){
+  if(tokens[playerId]) return;
+  const token = document.createElement("div");
+  token.className = "token";
+  token.style.background = color;
+  board.appendChild(token);
+  tokens[playerId] = token;
+}
 
-socket.on("state", (data) => {
-
-  data.players.forEach(player => {
-
-    const token = document.createElement("div");
-    token.className = "token";
-    token.style.background = player.color;
-
-    board.appendChild(token);
-    tokens[player.id] = token;
-
-    move(player.id, data.positions[player.id]);
-
-  });
-
-});
-
-function move(id, pos) {
-
+function moveToken(playerId, pos){
+  const token = tokens[playerId];
   const cell = cells[pos];
-  const token = tokens[id];
-
+  token.style.transition = "all 0.5s linear";
   token.style.left = (cell.x/1024*100)+"%";
   token.style.top = (cell.y/1024*100)+"%";
-
 }
+
+socket.on("state", (data) => {
+  players = data.players;
+  positions = data.positions;
+  players.forEach(p => {
+    createToken(p.id, p.color);
+    moveToken(p.id, positions[p.id]);
+  });
+});
+
+socket.on("playersUpdate", (list) => {
+  list.forEach(p => {
+    createToken(p.id, p.color);
+    if(positions[p.id] !== undefined){
+      moveToken(p.id, positions[p.id]);
+    }
+  });
+});
 
 document.getElementById("dice").onclick = () => {
   socket.emit("rollDice", roomCode);
 };
 
 socket.on("diceResult", (data) => {
-
-  alert("Выпало " + data.roll);
-  move(data.playerId, data.position);
-
+  positions[data.playerId] = data.position;
+  moveToken(data.playerId, data.position);
+  alert(`Выпало ${data.roll}`);
 });
