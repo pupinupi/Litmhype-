@@ -6,7 +6,7 @@ body{
 }
 
 #board-container{
-  position: relative; /* важно для абсолютного позиционирования фишек */
+  position: relative;
   width:90vw;
   max-width:1024px;
   margin:auto;
