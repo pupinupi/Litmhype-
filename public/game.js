@@ -1,7 +1,5 @@
 const socket = io();
 const roomCode = localStorage.getItem("room");
-const username = localStorage.getItem("username");
-const color = localStorage.getItem("color");
 
 const board = document.getElementById("board-container");
 let tokens = {};
@@ -15,7 +13,6 @@ const cells = [
   {x:776,y:588},{x:630,y:594},{x:494,y:586},{x:354,y:583},{x:215,y:586}
 ];
 
-// Создаём фишку игрока
 function createToken(playerId, color){
   if(tokens[playerId]) return;
   const token = document.createElement("div");
@@ -25,7 +22,6 @@ function createToken(playerId, color){
   tokens[playerId] = token;
 }
 
-// Двигаем фишку
 function moveToken(playerId, pos){
   const token = tokens[playerId];
   const cell = cells[pos] || cells[0];
@@ -34,10 +30,7 @@ function moveToken(playerId, pos){
   token.style.top = (cell.y/1024*100)+"%";
 }
 
-// Отправляем серверу данные текущего игрока
-socket.emit("joinRoom", { username, roomCode, color });
-
-// Получаем состояние всех игроков
+// Синхронизация состояния всех игроков
 socket.on("state", (data) => {
   players = data.players;
   positions = data.positions;
@@ -47,8 +40,9 @@ socket.on("state", (data) => {
   });
 });
 
-// Обновление игроков при подключении/отключении
+// Когда кто-то подключился или отключился
 socket.on("playersUpdate", (list) => {
+  players = list;
   list.forEach(p => {
     createToken(p.id, p.color);
     if(positions[p.id] === undefined) positions[p.id] = 0;
@@ -56,14 +50,14 @@ socket.on("playersUpdate", (list) => {
   });
 });
 
-// Бросок кубика
+// Кубик
 document.getElementById("dice").onclick = () => {
   socket.emit("rollDice", roomCode);
 };
 
-// Результат кубика
+// Результат кубика: обновляем **все позиции**
 socket.on("diceResult", (data) => {
-  positions[data.playerId] = data.position;
-  moveToken(data.playerId, data.position);
+  positions = data.positions; // <- ключевое исправление
+  players.forEach(p => moveToken(p.id, positions[p.id]));
   alert(`Выпало ${data.roll}`);
 });
